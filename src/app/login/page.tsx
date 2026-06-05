@@ -11,7 +11,11 @@ export default function LoginPage() {
       description="Supabase Auth entry point for production merchant access."
     >
       <div className="settings-grid">
-        <LoginForm isSupabaseConfigured={config.supabase.isConfigured} />
+        <LoginForm
+          isSupabaseConfigured={config.supabase.isConfigured}
+          supabasePublishableKey={config.supabase.publishableKey}
+          supabaseUrl={config.supabase.url}
+        />
         <section className="panel">
           <div className="panel-heading">
             <div>

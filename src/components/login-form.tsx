@@ -6,9 +6,13 @@ import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import { Field } from "./forms";
 
 export function LoginForm({
-  isSupabaseConfigured
+  isSupabaseConfigured,
+  supabasePublishableKey,
+  supabaseUrl
 }: {
   isSupabaseConfigured: boolean;
+  supabasePublishableKey?: string;
+  supabaseUrl?: string;
 }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,7 +30,10 @@ export function LoginForm({
 
     setIsSubmitting(true);
     try {
-      const supabase = createBrowserSupabaseClient();
+      const supabase = createBrowserSupabaseClient({
+        publishableKey: supabasePublishableKey,
+        url: supabaseUrl
+      });
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password
