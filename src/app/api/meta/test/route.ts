@@ -1,24 +1,23 @@
 import { activeShopMissing, ok } from "@/lib/api/responses";
-import { findActiveShop } from "@/lib/store/active-shop";
-import { getRepository } from "@/lib/store";
+import { getMerchantContext } from "@/lib/auth/session";
 
 export async function POST() {
-  const repo = getRepository();
-  const shop = await findActiveShop(repo);
+  const { repo, shop, user } = await getMerchantContext();
+  if (!user) return activeShopMissing();
   if (!shop) return activeShopMissing();
   const products = await repo.listProducts(shop.id);
-  const product = products.find((item) =>
-    item.keywords.some((keyword) => keyword.toLowerCase().includes("kurti"))
-  );
+  const product = products[0];
   const event = await repo.recordWebhookEvent({
     provider: "meta",
     eventType: "comment",
     sourceId: `comment-${Date.now()}`,
     matchedProductId: product?.id,
-    message: "linen kurti price koto? COD hobe?",
+    message: product
+      ? `Test comment asking about ${product.name}`
+      : "Test comment asking about product availability",
     reply: product
       ? `Matched ${product.name}. Suggested order link: /order/${shop.slug}/${product.slug}`
-      : "Fallback reply: A team member will reply soon.",
+      : "Fallback reply: add products before testing Meta reply matching.",
     status: product ? "matched" : "fallback"
   });
 

@@ -63,6 +63,12 @@ create table public.shop_members (
   unique (shop_id, user_id)
 );
 
+create table public.platform_admins (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  role text not null default 'owner',
+  created_at timestamptz not null default now()
+);
+
 create table public.products (
   id uuid primary key default gen_random_uuid(),
   shop_id uuid not null references public.shops(id) on delete cascade,
@@ -164,6 +170,7 @@ for each row execute function public.set_updated_at();
 
 create index shops_slug_idx on public.shops (slug);
 create index shop_members_user_id_idx on public.shop_members (user_id);
+create index platform_admins_created_at_idx on public.platform_admins (created_at desc);
 create index products_shop_id_created_at_idx on public.products (shop_id, created_at desc);
 create index products_shop_id_slug_idx on public.products (shop_id, slug);
 create index products_keywords_gin_idx on public.products using gin (keywords);
@@ -175,6 +182,7 @@ create index billing_records_shop_id_created_at_idx on public.billing_records (s
 
 alter table public.shops enable row level security;
 alter table public.shop_members enable row level security;
+alter table public.platform_admins enable row level security;
 alter table public.products enable row level security;
 alter table public.orders enable row level security;
 alter table public.reply_templates enable row level security;
@@ -195,10 +203,101 @@ as $$
   );
 $$;
 
+create or replace function public.is_platform_admin()
+returns boolean
+language sql
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.platform_admins
+    where user_id = auth.uid()
+  );
+$$;
+
+create or replace function public.create_merchant_shop(
+  shop_name text,
+  owner_name text default '',
+  support_phone text default '',
+  default_district text default 'Dhaka'
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  actor uuid := auth.uid();
+  base_slug text;
+  candidate_slug text;
+  new_shop_id uuid;
+  suffix integer := 0;
+begin
+  if actor is null then
+    raise exception 'Authentication is required';
+  end if;
+
+  if length(trim(coalesce(shop_name, ''))) < 2 then
+    raise exception 'Shop name is required';
+  end if;
+
+  base_slug := lower(regexp_replace(trim(shop_name), '[^a-z0-9]+', '-', 'g'));
+  base_slug := trim(both '-' from base_slug);
+  if base_slug = '' then
+    base_slug := 'shop';
+  end if;
+
+  candidate_slug := base_slug;
+  while exists (select 1 from public.shops where slug = candidate_slug) loop
+    suffix := suffix + 1;
+    candidate_slug := base_slug || '-' || suffix::text;
+  end loop;
+
+  insert into public.shops (
+    slug,
+    name,
+    owner_name,
+    phone,
+    email,
+    support_phone,
+    default_district,
+    status,
+    plan,
+    billing_notes,
+    support_notes
+  ) values (
+    candidate_slug,
+    trim(shop_name),
+    trim(coalesce(owner_name, '')),
+    trim(coalesce(support_phone, '')),
+    coalesce(auth.jwt() ->> 'email', ''),
+    trim(coalesce(support_phone, '')),
+    trim(coalesce(default_district, 'Dhaka')),
+    'active',
+    'pilot',
+    'Merchant-created workspace.',
+    'Created from merchant onboarding.'
+  )
+  returning id into new_shop_id;
+
+  insert into public.shop_members (shop_id, user_id, role)
+  values (new_shop_id, actor, 'owner')
+  on conflict (shop_id, user_id) do update set role = 'owner';
+
+  return new_shop_id;
+end;
+$$;
+
 create policy "members can read their shops"
 on public.shops for select
 to authenticated
 using (public.is_shop_member(id));
+
+create policy "platform admins can read all shops"
+on public.shops for select
+to authenticated
+using (public.is_platform_admin());
 
 create policy "public can read active shop links"
 on public.shops for select
@@ -216,10 +315,25 @@ on public.shop_members for select
 to authenticated
 using (public.is_shop_member(shop_id));
 
+create policy "users can read own platform admin row"
+on public.platform_admins for select
+to authenticated
+using (user_id = auth.uid());
+
+create policy "platform admins can read platform admin rows"
+on public.platform_admins for select
+to authenticated
+using (public.is_platform_admin());
+
 create policy "members can read products"
 on public.products for select
 to authenticated
 using (public.is_shop_member(shop_id));
+
+create policy "platform admins can read all products"
+on public.products for select
+to authenticated
+using (public.is_platform_admin());
 
 create policy "members can write products"
 on public.products for all
@@ -236,6 +350,11 @@ create policy "members can read orders"
 on public.orders for select
 to authenticated
 using (public.is_shop_member(shop_id));
+
+create policy "platform admins can read all orders"
+on public.orders for select
+to authenticated
+using (public.is_platform_admin());
 
 create policy "members can update orders"
 on public.orders for update
@@ -261,6 +380,11 @@ on public.reply_templates for select
 to authenticated
 using (public.is_shop_member(shop_id));
 
+create policy "platform admins can read all templates"
+on public.reply_templates for select
+to authenticated
+using (public.is_platform_admin());
+
 create policy "members can write templates"
 on public.reply_templates for all
 to authenticated
@@ -271,6 +395,11 @@ create policy "members can read billing"
 on public.billing_records for select
 to authenticated
 using (public.is_shop_member(shop_id));
+
+create policy "platform admins can read all billing"
+on public.billing_records for select
+to authenticated
+using (public.is_platform_admin());
 
 create policy "members can read webhook events"
 on public.webhook_events for select
@@ -284,6 +413,11 @@ using (
       and public.is_shop_member(products.shop_id)
   )
 );
+
+create policy "platform admins can read all webhook events"
+on public.webhook_events for select
+to authenticated
+using (public.is_platform_admin());
 
 create policy "server routes can insert webhook events"
 on public.webhook_events for insert

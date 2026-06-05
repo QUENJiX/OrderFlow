@@ -4,21 +4,17 @@ import {
   FileText,
   Home,
   Settings,
-  ShieldCheck,
-  Sparkles,
-  LogIn
+  Sparkles
 } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
 const navItems = [
-  { href: "/", label: "Dashboard", icon: Home },
-  { href: "/products", label: "Products", icon: Boxes },
-  { href: "/orders", label: "Orders", icon: ClipboardList },
-  { href: "/templates", label: "Templates", icon: FileText },
-  { href: "/settings", label: "Settings", icon: Settings },
-  { href: "/admin", label: "Admin", icon: ShieldCheck },
-  { href: "/login", label: "Login", icon: LogIn }
+  { href: "/merchant/dashboard", label: "Dashboard", icon: Home },
+  { href: "/merchant/products", label: "Products", icon: Boxes },
+  { href: "/merchant/orders", label: "Orders", icon: ClipboardList },
+  { href: "/merchant/templates", label: "Templates", icon: FileText },
+  { href: "/merchant/settings", label: "Settings", icon: Settings }
 ];
 
 export function AppShell({
@@ -39,7 +35,7 @@ export function AppShell({
           <span className="brand-mark">OF</span>
           <span>
             <strong>OrderFlow BD</strong>
-            <small>Local MVP</small>
+            <small>Merchant workspace</small>
           </span>
         </Link>
         <nav className="side-nav" aria-label="Main navigation">
@@ -56,7 +52,7 @@ export function AppShell({
         <div className="local-mode">
           <Sparkles size={18} aria-hidden />
           <span>
-            Demo data is in memory. Supabase and provider APIs can plug in later.
+            Merchant access is controlled by Supabase Auth and shop membership.
           </span>
         </div>
       </aside>

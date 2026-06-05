@@ -635,6 +635,222 @@ td input {
   margin: 0;
 }
 
+.landing-page,
+.auth-page,
+.control-page {
+  margin: 0 auto;
+  max-width: 1180px;
+  min-height: 100vh;
+  padding: 22px;
+}
+
+.landing-nav,
+.control-header {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  margin-bottom: 34px;
+}
+
+.landing-actions,
+.hero-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.landing-hero {
+  align-items: center;
+  display: grid;
+  gap: 28px;
+  grid-template-columns: minmax(0, 0.95fr) minmax(340px, 1fr);
+  margin-bottom: 34px;
+}
+
+.landing-copy {
+  display: grid;
+  gap: 18px;
+}
+
+.landing-copy h1,
+.auth-copy h1 {
+  font-size: 48px;
+  letter-spacing: 0;
+  line-height: 1.02;
+  margin: 0;
+}
+
+.landing-copy p,
+.auth-copy p,
+.landing-workflow p,
+.landing-admin-note p {
+  color: var(--muted);
+  line-height: 1.65;
+  margin: 0;
+}
+
+.landing-product-shot {
+  background: #17231f;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  color: #edf4ef;
+  overflow: hidden;
+}
+
+.shot-bar {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  display: flex;
+  gap: 7px;
+  padding: 14px 16px;
+}
+
+.shot-bar span {
+  background: #d9f5e9;
+  border-radius: 999px;
+  height: 8px;
+  opacity: 0.8;
+  width: 8px;
+}
+
+.shot-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 16px;
+}
+
+.shot-card,
+.shot-list {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+}
+
+.shot-card small,
+.shot-card span,
+.shot-list span {
+  color: #bfd5cc;
+  font-size: 12px;
+}
+
+.shot-card strong {
+  color: #ffffff;
+  font-size: 30px;
+  line-height: 1;
+}
+
+.shot-list {
+  grid-column: 1 / -1;
+}
+
+.shot-list p {
+  color: #ffffff;
+  font-weight: 800;
+  margin: 0;
+}
+
+.shot-list div {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+}
+
+.shot-list strong {
+  color: #d9f5e9;
+  font-size: 12px;
+}
+
+.landing-workflow {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 18px;
+}
+
+.landing-workflow article,
+.landing-admin-note {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+.landing-workflow article {
+  display: grid;
+  gap: 10px;
+  padding: 18px;
+}
+
+.landing-workflow svg,
+.landing-admin-note svg {
+  color: var(--accent);
+}
+
+.landing-workflow h2,
+.landing-admin-note h2 {
+  font-size: 18px;
+  line-height: 1.25;
+  margin: 0;
+}
+
+.landing-admin-note {
+  align-items: flex-start;
+  display: flex;
+  gap: 12px;
+  padding: 18px;
+}
+
+.auth-page {
+  align-items: center;
+  display: grid;
+  gap: 28px;
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 480px);
+}
+
+.auth-copy {
+  display: grid;
+  gap: 18px;
+  max-width: 620px;
+}
+
+.auth-brand {
+  margin-bottom: 10px;
+}
+
+.auth-toggle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.control-auth-page {
+  grid-template-columns: minmax(0, 0.9fr) minmax(340px, 460px);
+}
+
+.control-page {
+  max-width: 1220px;
+}
+
+.control-header span {
+  color: var(--muted);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.control-title {
+  margin-bottom: 18px;
+}
+
 .login-panel {
   max-width: 520px;
   width: 100%;
@@ -797,7 +1013,9 @@ td input {
   .dashboard-grid,
   .workspace-grid,
   .settings-grid,
-  .public-product {
+  .public-product,
+  .landing-hero,
+  .auth-page {
     grid-template-columns: 1fr;
   }
 
@@ -811,14 +1029,18 @@ td input {
   }
 
   .metrics-grid,
-  .template-grid {
+  .template-grid,
+  .landing-workflow {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 720px) {
   .main-panel,
-  .public-order {
+  .public-order,
+  .landing-page,
+  .auth-page,
+  .control-page {
     padding: 16px;
   }
 
@@ -826,7 +1048,8 @@ td input {
   .panel-heading,
   .compact-row,
   .shortcut-row,
-  .product-row {
+  .product-row,
+  .landing-admin-note {
     align-items: stretch;
     flex-direction: column;
   }
@@ -843,13 +1066,23 @@ td input {
   .side-nav,
   .metrics-grid,
   .form-grid,
-  .template-grid {
+  .template-grid,
+  .landing-workflow,
+  .shot-grid {
     grid-template-columns: 1fr;
+  }
+
+  .landing-nav,
+  .control-header {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .page-header h1,
   .public-product h1,
-  .success-card h1 {
+  .success-card h1,
+  .landing-copy h1,
+  .auth-copy h1 {
     font-size: 28px;
   }
 

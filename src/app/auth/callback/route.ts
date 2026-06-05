@@ -12,5 +12,5 @@ export async function GET(request: Request) {
     await supabase.auth.exchangeCodeForSession(code);
   }
 
-  return NextResponse.redirect(new URL("/settings?auth=callback", requestUrl));
+  return NextResponse.redirect(new URL("/merchant/setup?auth=callback", requestUrl));
 }

@@ -1,13 +1,12 @@
 import { activeShopMissing } from "@/lib/api/responses";
+import { getMerchantContext } from "@/lib/auth/session";
 import { buildCourierCsv } from "@/lib/domain/csv";
-import { findActiveShop } from "@/lib/store/active-shop";
-import { getRepository } from "@/lib/store";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const status = url.searchParams.get("status");
-  const repo = getRepository();
-  const shop = await findActiveShop(repo);
+  const { repo, shop, user } = await getMerchantContext();
+  if (!user) return activeShopMissing();
   if (!shop) return activeShopMissing();
   const orders = await repo.listOrders(shop.id);
   const products = await repo.listProducts(shop.id);

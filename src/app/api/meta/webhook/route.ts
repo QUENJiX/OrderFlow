@@ -1,6 +1,4 @@
-import { activeShopMissing, fail, ok } from "@/lib/api/responses";
-import { findActiveShop } from "@/lib/store/active-shop";
-import { getRepository } from "@/lib/store";
+import { fail, ok } from "@/lib/api/responses";
 
 const defaultVerifyToken = "orderflow-local-verify-token";
 
@@ -25,20 +23,15 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   const payload = await request.json().catch(() => ({}));
-  const repo = getRepository();
-  const shop = await findActiveShop(repo);
-  if (!shop) return activeShopMissing();
-  const products = await repo.listProducts(shop.id);
-  const firstProduct = products[0];
-  const event = await repo.recordWebhookEvent({
-    provider: "meta",
-    eventType: "test",
-    sourceId: "local-webhook",
-    matchedProductId: firstProduct?.id,
-    message: JSON.stringify(payload).slice(0, 500),
-    reply: "Local demo webhook event recorded. Real Meta replies are not connected.",
-    status: "simulated"
-  });
 
-  return ok(event, { status: 202 });
+  return ok(
+    {
+      received: true,
+      recorded: false,
+      reason:
+        "Meta page to shop mapping is not configured yet. Merchant-owned test events are available at /api/meta/test.",
+      preview: JSON.stringify(payload).slice(0, 500)
+    },
+    { status: 202 }
+  );
 }

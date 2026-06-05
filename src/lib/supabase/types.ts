@@ -32,6 +32,36 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["shops"]["Row"]>;
         Relationships: [];
       };
+      shop_members: {
+        Row: {
+          id: string;
+          shop_id: string;
+          user_id: string;
+          role: string;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["shop_members"]["Row"]>;
+        Update: Partial<Database["public"]["Tables"]["shop_members"]["Row"]>;
+        Relationships: [
+          {
+            foreignKeyName: "shop_members_shop_id_fkey";
+            columns: ["shop_id"];
+            isOneToOne: false;
+            referencedRelation: "shops";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      platform_admins: {
+        Row: {
+          user_id: string;
+          role: string;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["platform_admins"]["Row"]>;
+        Update: Partial<Database["public"]["Tables"]["platform_admins"]["Row"]>;
+        Relationships: [];
+      };
       products: {
         Row: {
           id: string;
@@ -179,7 +209,19 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      create_merchant_shop: {
+        Args: {
+          default_district?: string;
+          owner_name?: string;
+          shop_name: string;
+          support_phone?: string;
+        };
+        Returns: string;
+      };
+      is_platform_admin: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
     };
   };
 };

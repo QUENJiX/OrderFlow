@@ -1,170 +1,121 @@
 import {
-  Boxes,
+  ArrowRight,
   ClipboardList,
-  Download,
-  Timer,
-  WalletCards
+  MessageCircle,
+  PackageCheck,
+  ShieldCheck
 } from "lucide-react";
 import Link from "next/link";
-import { AppShell } from "@/components/app-shell";
-import { CopyButton } from "@/components/copy-button";
-import { MetricCard } from "@/components/metric-card";
-import { OrderStatusBadge, PaymentStatusBadge } from "@/components/status-badge";
-import { SupabaseSetupNotice } from "@/components/supabase-setup-notice";
-import { formatBdt } from "@/lib/domain/money";
-import { findActiveShop } from "@/lib/store/active-shop";
-import { getRepository } from "@/lib/store";
 
-export const dynamic = "force-dynamic";
-
-export default async function DashboardPage() {
-  const repo = getRepository();
-  const shop = await findActiveShop(repo);
-  if (!shop) {
-    return (
-      <AppShell
-        title="Merchant dashboard"
-        description="A practical order desk for manual Facebook inquiry to COD courier workflow."
-      >
-        <SupabaseSetupNotice />
-      </AppShell>
-    );
+const workflow = [
+  {
+    icon: MessageCircle,
+    title: "Reply with a clean order link",
+    text: "Send customers a product-specific link from comments, Messenger, or WhatsApp."
+  },
+  {
+    icon: ClipboardList,
+    title: "Capture COD and manual MFS orders",
+    text: "Collect customer name, phone, address, quantity, variant, and payment reference."
+  },
+  {
+    icon: PackageCheck,
+    title: "Export courier-ready rows",
+    text: "Move confirmed orders into your delivery workflow without spreadsheet chaos."
   }
+];
 
-  const [orders, products, templates] = await Promise.all([
-    repo.listOrders(shop.id),
-    repo.listProducts(shop.id),
-    repo.listReplyTemplates(shop.id)
-  ]);
-  const today = new Date().toDateString();
-  const ordersToday = orders.filter(
-    (order) => new Date(order.createdAt).toDateString() === today
-  );
-  const courierReady = orders.filter((order) => order.status === "courier_ready");
-  const pendingPayments = orders.filter(
-    (order) => order.paymentStatus === "awaiting_verification"
-  );
-  const revenue = orders.reduce((sum, order) => sum + order.total, 0);
-  const productById = new Map(products.map((product) => [product.id, product]));
-  const firstProduct = products[0];
-  const firstTemplate = templates[0];
-  const orderLink = firstProduct
-    ? `/order/${shop.slug}/${firstProduct.slug}`
-    : "/";
-
+export default function LandingPage() {
   return (
-    <AppShell
-      title="Merchant dashboard"
-      description="A practical order desk for manual Facebook inquiry to COD courier workflow."
-      actions={
-        <Link className="secondary-button" href="/api/orders/export" prefetch={false}>
-          <Download size={16} />
-          Export courier CSV
+    <main className="landing-page">
+      <nav className="landing-nav" aria-label="Public navigation">
+        <Link className="brand" href="/">
+          <span className="brand-mark">OF</span>
+          <span>
+            <strong>OrderFlow BD</strong>
+            <small>F-commerce order desk</small>
+          </span>
         </Link>
-      }
-    >
-      <section className="metrics-grid">
-        <MetricCard
-          detail="Local demo data"
-          icon={<ClipboardList size={18} />}
-          label="Orders today"
-          value={ordersToday.length}
-        />
-        <MetricCard
-          detail="All captured orders"
-          icon={<WalletCards size={18} />}
-          label="Order value"
-          value={formatBdt(revenue)}
-        />
-        <MetricCard
-          detail="Needs courier action"
-          icon={<Timer size={18} />}
-          label="Courier ready"
-          value={courierReady.length}
-        />
-        <MetricCard
-          detail="Manual bKash/Nagad"
-          icon={<Boxes size={18} />}
-          label="Pending payment"
-          value={pendingPayments.length}
-        />
+        <div className="landing-actions">
+          <Link className="secondary-button" href="/merchant/login">
+            Merchant login
+          </Link>
+        </div>
+      </nav>
+
+      <section className="landing-hero">
+        <div className="landing-copy">
+          <h1>Turn Facebook interest into confirmed orders.</h1>
+          <p>
+            OrderFlow gives Bangladesh F-commerce sellers a merchant workspace,
+            public order links, COD/manual payment tracking, and courier-ready
+            exports.
+          </p>
+          <div className="hero-actions">
+            <Link className="primary-button" href="/merchant/login">
+              Start merchant setup
+              <ArrowRight size={16} />
+            </Link>
+            <Link
+              className="secondary-button"
+              href="#workflow"
+            >
+              See workflow
+            </Link>
+          </div>
+        </div>
+
+        <div className="landing-product-shot" aria-label="OrderFlow dashboard preview">
+          <div className="shot-bar">
+            <span />
+            <span />
+            <span />
+          </div>
+          <div className="shot-grid">
+            <div className="shot-card">
+              <small>Orders today</small>
+              <strong>New</strong>
+              <span>New customer submissions</span>
+            </div>
+            <div className="shot-card">
+              <small>Courier ready</small>
+              <strong>Ready</strong>
+              <span>Needs delivery action</span>
+            </div>
+            <div className="shot-list">
+              <p>Recent orders</p>
+              <div><span>Customer order</span><strong>COD</strong></div>
+              <div><span>Payment check</span><strong>bKash</strong></div>
+              <div><span>Courier export</span><strong>CSV</strong></div>
+            </div>
+          </div>
+        </div>
       </section>
 
-      <div className="dashboard-grid">
-        <section className="panel">
-          <div className="panel-heading">
-            <div>
-              <h2>Recent orders</h2>
-              <p>New customer submissions from public order links.</p>
-            </div>
-          </div>
-          <div className="stack-list">
-            {orders.slice(0, 5).map((order) => {
-              const product = productById.get(order.productId);
-              return (
-                <article className="compact-row" key={order.id}>
-                  <div>
-                    <strong>{order.customer.name}</strong>
-                    <span>
-                      {product?.name ?? "Unknown product"} · Qty {order.quantity}
-                    </span>
-                  </div>
-                  <div className="compact-status">
-                    <OrderStatusBadge status={order.status} />
-                    <PaymentStatusBadge status={order.paymentStatus} />
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        </section>
+      <section className="landing-workflow" id="workflow">
+        {workflow.map((item) => {
+          const Icon = item.icon;
+          return (
+            <article key={item.title}>
+              <Icon size={22} />
+              <h2>{item.title}</h2>
+              <p>{item.text}</p>
+            </article>
+          );
+        })}
+      </section>
 
-        <section className="panel">
-          <div className="panel-heading">
-            <div>
-              <h2>Daily shortcuts</h2>
-              <p>Copy links and replies without hunting through the app.</p>
-            </div>
-          </div>
-          <div className="shortcut-list">
-            {firstProduct ? (
-              <div className="shortcut-row">
-                <div>
-                  <strong>{firstProduct.name} order link</strong>
-                  <span>{orderLink}</span>
-                </div>
-                <CopyButton label="Copy link" value={orderLink} />
-              </div>
-            ) : null}
-            {firstTemplate && firstProduct ? (
-              <div className="shortcut-row">
-                <div>
-                  <strong>{firstTemplate.title}</strong>
-                  <span>
-                    {firstTemplate.body
-                      .replaceAll("{price}", String(firstProduct.price))
-                      .replaceAll("{order_link}", orderLink)
-                      .replaceAll(
-                        "{delivery_charge}",
-                        String(firstProduct.deliveryCharge)
-                      )}
-                  </span>
-                </div>
-                <CopyButton
-                  label="Copy reply"
-                  value={firstTemplate.body
-                    .replaceAll("{price}", String(firstProduct.price))
-                    .replaceAll("{order_link}", orderLink)
-                    .replaceAll(
-                      "{delivery_charge}",
-                      String(firstProduct.deliveryCharge)
-                    )}
-                />
-              </div>
-            ) : null}
-          </div>
-        </section>
-      </div>
-    </AppShell>
+      <section className="landing-admin-note">
+        <ShieldCheck size={22} />
+        <div>
+          <h2>Separate platform control</h2>
+          <p>
+            Merchant access and developer/admin access are separate. The control
+            room is hidden from public navigation and requires platform admin
+            membership.
+          </p>
+        </div>
+      </section>
+    </main>
   );
 }

@@ -1,12 +1,13 @@
 import { ok } from "@/lib/api/responses";
+import { getCurrentUser, getMerchantShopForUser } from "@/lib/auth/session";
 import { getRuntimeConfig } from "@/lib/config/env";
-import { findActiveShop } from "@/lib/store/active-shop";
-import { getRepository } from "@/lib/store";
 
 export async function GET() {
   const config = getRuntimeConfig();
-  const repo = getRepository();
-  const activeShop = await findActiveShop(repo).catch(() => undefined);
+  const user = await getCurrentUser();
+  const merchantShop = user
+    ? await getMerchantShopForUser(user.id).catch(() => undefined)
+    : undefined;
 
   return ok({
     status: "ok",
@@ -15,7 +16,8 @@ export async function GET() {
     persistence: config.mode === "supabase" ? "supabase" : "in-memory",
     supabaseConfigured: config.supabase.isConfigured,
     missingSupabaseEnv: config.supabase.missing,
-    activeShopVisible: Boolean(activeShop),
+    merchantAuthenticated: Boolean(user),
+    merchantShopVisible: Boolean(merchantShop),
     timestamp: new Date().toISOString()
   });
 }
