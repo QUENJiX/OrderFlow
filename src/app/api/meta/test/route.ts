@@ -1,10 +1,11 @@
-import { ok } from "@/lib/api/responses";
-import { getActiveShop } from "@/lib/store/active-shop";
+import { activeShopMissing, ok } from "@/lib/api/responses";
+import { findActiveShop } from "@/lib/store/active-shop";
 import { getRepository } from "@/lib/store";
 
 export async function POST() {
   const repo = getRepository();
-  const shop = await getActiveShop(repo);
+  const shop = await findActiveShop(repo);
+  if (!shop) return activeShopMissing();
   const products = await repo.listProducts(shop.id);
   const product = products.find((item) =>
     item.keywords.some((keyword) => keyword.toLowerCase().includes("kurti"))

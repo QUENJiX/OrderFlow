@@ -200,6 +200,11 @@ on public.shops for select
 to authenticated
 using (public.is_shop_member(id));
 
+create policy "public can read active shop links"
+on public.shops for select
+to anon, authenticated
+using (status in ('pilot', 'active'));
+
 create policy "members can update their shops"
 on public.shops for update
 to authenticated
@@ -224,7 +229,7 @@ with check (public.is_shop_member(shop_id));
 
 create policy "public can read active product links"
 on public.products for select
-to anon
+to anon, authenticated
 using (active);
 
 create policy "members can read orders"
@@ -280,7 +285,7 @@ using (
   )
 );
 
-create policy "authenticated can insert webhook events"
+create policy "server routes can insert webhook events"
 on public.webhook_events for insert
-to authenticated
+to anon, authenticated
 with check (true);

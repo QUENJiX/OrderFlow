@@ -22,6 +22,13 @@ export function fail(
   );
 }
 
+export function activeShopMissing() {
+  return fail(
+    "Supabase is connected, but the active shop is not visible. Run supabase/schema.sql, run supabase/seed.sql, then add your authenticated user to shop_members.",
+    { status: 409 }
+  );
+}
+
 export function handleApiError(error: unknown) {
   if (error instanceof RepositoryValidationError) {
     return fail("Validation failed", {

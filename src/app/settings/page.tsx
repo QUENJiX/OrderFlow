@@ -1,8 +1,9 @@
 import { CheckCircle2, CircleDashed } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
+import { SupabaseSetupNotice } from "@/components/supabase-setup-notice";
 import { getRuntimeConfig } from "@/lib/config/env";
 import { COURIER_LABELS } from "@/lib/domain/types";
-import { getActiveShop } from "@/lib/store/active-shop";
+import { findActiveShop } from "@/lib/store/active-shop";
 import { getRepository } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
@@ -37,15 +38,15 @@ const integrations = [
 export default async function SettingsPage() {
   const repo = getRepository();
   const config = getRuntimeConfig();
-  const shop = await getActiveShop(repo);
+  const shop = await findActiveShop(repo);
 
   return (
     <AppShell
       title="Settings"
       description="Shop profile and integration readiness for the practical MVP."
     >
-      {shop ? (
-        <div className="settings-grid">
+      <div className="settings-grid">
+        {shop ? (
           <section className="panel">
             <div className="panel-heading">
               <div>
@@ -76,8 +77,11 @@ export default async function SettingsPage() {
               </div>
             </dl>
           </section>
+        ) : (
+          <SupabaseSetupNotice />
+        )}
 
-          <section className="panel">
+        <section className="panel">
             <div className="panel-heading">
               <div>
                 <h2>Runtime mode</h2>
@@ -111,7 +115,7 @@ export default async function SettingsPage() {
             </dl>
           </section>
 
-          <section className="panel">
+        <section className="panel">
             <div className="panel-heading">
               <div>
                 <h2>Integration readiness</h2>
@@ -135,8 +139,7 @@ export default async function SettingsPage() {
               ))}
             </div>
           </section>
-        </div>
-      ) : null}
+      </div>
     </AppShell>
   );
 }

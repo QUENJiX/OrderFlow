@@ -1,11 +1,12 @@
-import { handleApiError, ok } from "@/lib/api/responses";
+import { activeShopMissing, handleApiError, ok } from "@/lib/api/responses";
 import type { OrderInput } from "@/lib/domain/types";
-import { getActiveShop } from "@/lib/store/active-shop";
+import { findActiveShop } from "@/lib/store/active-shop";
 import { getRepository } from "@/lib/store";
 
 export async function GET() {
   const repo = getRepository();
-  const shop = await getActiveShop(repo);
+  const shop = await findActiveShop(repo);
+  if (!shop) return activeShopMissing();
   const orders = await repo.listOrders(shop.id);
   return ok(orders);
 }

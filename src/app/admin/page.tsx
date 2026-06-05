@@ -1,14 +1,26 @@
 import { AppShell } from "@/components/app-shell";
 import { MetricCard } from "@/components/metric-card";
+import { SupabaseSetupNotice } from "@/components/supabase-setup-notice";
 import { formatBdt } from "@/lib/domain/money";
-import { getActiveShop } from "@/lib/store/active-shop";
+import { findActiveShop } from "@/lib/store/active-shop";
 import { getRepository } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
   const repo = getRepository();
-  const shop = await getActiveShop(repo);
+  const shop = await findActiveShop(repo);
+  if (!shop) {
+    return (
+      <AppShell
+        title="Pilot admin"
+        description="Lightweight support view for founder-led onboarding and billing notes."
+      >
+        <SupabaseSetupNotice />
+      </AppShell>
+    );
+  }
+
   const [shops, orders, billing, events] = await Promise.all([
     repo.listShops(),
     repo.listOrders(shop.id),

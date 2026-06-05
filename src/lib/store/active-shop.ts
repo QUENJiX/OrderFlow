@@ -5,8 +5,12 @@ type ShopResolver = {
   getShopBySlug(slug: string): Promise<Shop | undefined>;
 };
 
+export async function findActiveShop(repo: ShopResolver) {
+  return repo.getShopBySlug(demoShop.slug);
+}
+
 export async function getActiveShop(repo: ShopResolver) {
-  const shop = await repo.getShopBySlug(demoShop.slug);
+  const shop = await findActiveShop(repo);
   if (!shop) {
     throw new Error("Active shop was not found");
   }
