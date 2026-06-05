@@ -5,7 +5,8 @@ import {
   Home,
   Settings,
   ShieldCheck,
-  Sparkles
+  Sparkles,
+  LogIn
 } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -16,7 +17,8 @@ const navItems = [
   { href: "/orders", label: "Orders", icon: ClipboardList },
   { href: "/templates", label: "Templates", icon: FileText },
   { href: "/settings", label: "Settings", icon: Settings },
-  { href: "/admin", label: "Admin", icon: ShieldCheck }
+  { href: "/admin", label: "Admin", icon: ShieldCheck },
+  { href: "/login", label: "Login", icon: LogIn }
 ];
 
 export function AppShell({

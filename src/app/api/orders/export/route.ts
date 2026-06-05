@@ -1,13 +1,14 @@
 import { buildCourierCsv } from "@/lib/domain/csv";
-import { demoShop } from "@/lib/domain/seed";
+import { getActiveShop } from "@/lib/store/active-shop";
 import { getRepository } from "@/lib/store";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const status = url.searchParams.get("status");
   const repo = getRepository();
-  const orders = await repo.listOrders(demoShop.id);
-  const products = await repo.listProducts(demoShop.id);
+  const shop = await getActiveShop(repo);
+  const orders = await repo.listOrders(shop.id);
+  const products = await repo.listProducts(shop.id);
   const exportOrders = status
     ? orders.filter((order) => order.status === status)
     : orders;

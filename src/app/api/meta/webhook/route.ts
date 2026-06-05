@@ -1,5 +1,5 @@
 import { fail, ok } from "@/lib/api/responses";
-import { demoShop } from "@/lib/domain/seed";
+import { getActiveShop } from "@/lib/store/active-shop";
 import { getRepository } from "@/lib/store";
 
 const defaultVerifyToken = "orderflow-local-verify-token";
@@ -26,7 +26,8 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const payload = await request.json().catch(() => ({}));
   const repo = getRepository();
-  const products = await repo.listProducts(demoShop.id);
+  const shop = await getActiveShop(repo);
+  const products = await repo.listProducts(shop.id);
   const firstProduct = products[0];
   const event = await repo.recordWebhookEvent({
     provider: "meta",

@@ -282,6 +282,7 @@ table {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
+  min-width: 0;
 }
 
 .metric-card {
@@ -325,6 +326,13 @@ td small,
   display: grid;
   gap: 18px;
   grid-template-columns: minmax(0, 1fr) minmax(360px, 0.75fr);
+}
+
+.dashboard-grid > *,
+.workspace-grid > *,
+.settings-grid > *,
+.template-grid > * {
+  min-width: 0;
 }
 
 .workspace-grid {
@@ -582,7 +590,9 @@ td input {
 .detail-list div {
   border-bottom: 1px solid var(--border);
   display: flex;
+  gap: 12px;
   justify-content: space-between;
+  min-width: 0;
   padding-bottom: 10px;
 }
 
@@ -594,6 +604,9 @@ td input {
 .detail-list dd {
   font-weight: 800;
   margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-align: right;
 }
 
 .integration-row {
@@ -620,6 +633,23 @@ td input {
   font-size: 13px;
   line-height: 1.5;
   margin: 0;
+}
+
+.login-panel {
+  max-width: 520px;
+  width: 100%;
+}
+
+.mode-callout {
+  background: var(--warning-soft);
+  border: 1px solid #efd39d;
+  border-radius: 8px;
+  color: var(--warning);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  padding: 10px 12px;
 }
 
 .public-order {

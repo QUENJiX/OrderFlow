@@ -1,15 +1,16 @@
 import { AppShell } from "@/components/app-shell";
 import { OrdersWorkspace } from "@/components/orders-workspace";
-import { demoShop } from "@/lib/domain/seed";
+import { getActiveShop } from "@/lib/store/active-shop";
 import { getRepository } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
 export default async function OrdersPage() {
   const repo = getRepository();
+  const shop = await getActiveShop(repo);
   const [orders, products] = await Promise.all([
-    repo.listOrders(demoShop.id),
-    repo.listProducts(demoShop.id)
+    repo.listOrders(shop.id),
+    repo.listProducts(shop.id)
   ]);
 
   return (

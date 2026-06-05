@@ -1,18 +1,19 @@
 import { AppShell } from "@/components/app-shell";
 import { MetricCard } from "@/components/metric-card";
 import { formatBdt } from "@/lib/domain/money";
-import { demoShop } from "@/lib/domain/seed";
+import { getActiveShop } from "@/lib/store/active-shop";
 import { getRepository } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
   const repo = getRepository();
+  const shop = await getActiveShop(repo);
   const [shops, orders, billing, events] = await Promise.all([
     repo.listShops(),
-    repo.listOrders(demoShop.id),
-    repo.listBillingRecords(demoShop.id),
-    repo.listWebhookEvents(demoShop.id)
+    repo.listOrders(shop.id),
+    repo.listBillingRecords(shop.id),
+    repo.listWebhookEvents(shop.id)
   ]);
   const revenue = orders.reduce((sum, order) => sum + order.total, 0);
 

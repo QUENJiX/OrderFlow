@@ -1,7 +1,8 @@
 import { CheckCircle2, CircleDashed } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
-import { demoShop } from "@/lib/domain/seed";
+import { getRuntimeConfig } from "@/lib/config/env";
 import { COURIER_LABELS } from "@/lib/domain/types";
+import { getActiveShop } from "@/lib/store/active-shop";
 import { getRepository } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
@@ -9,9 +10,9 @@ export const dynamic = "force-dynamic";
 const integrations = [
   {
     name: "Supabase Auth + Postgres",
-    status: "Ready boundary",
+    status: "Schema ready",
     detail:
-      "Repository interface is active. A Supabase implementation can replace the local store."
+      "Repository interface, clients, schema, seed, and mode selection are in place."
   },
   {
     name: "Meta Page automation",
@@ -35,7 +36,8 @@ const integrations = [
 
 export default async function SettingsPage() {
   const repo = getRepository();
-  const shop = await repo.getShopById(demoShop.id);
+  const config = getRuntimeConfig();
+  const shop = await getActiveShop(repo);
 
   return (
     <AppShell
@@ -71,6 +73,40 @@ export default async function SettingsPage() {
               <div>
                 <dt>Plan</dt>
                 <dd>{shop.plan}</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section className="panel">
+            <div className="panel-heading">
+              <div>
+                <h2>Runtime mode</h2>
+                <p>
+                  The app chooses Supabase only when public Supabase env vars are
+                  complete. Run `supabase/schema.sql` then `supabase/seed.sql`.
+                </p>
+              </div>
+            </div>
+            <dl className="detail-list">
+              <div>
+                <dt>Current mode</dt>
+                <dd>{config.mode}</dd>
+              </div>
+              <div>
+                <dt>Supabase URL</dt>
+                <dd>{config.supabase.url ? "Configured" : "Missing"}</dd>
+              </div>
+              <div>
+                <dt>Public key</dt>
+                <dd>{config.supabase.publishableKey ? "Configured" : "Missing"}</dd>
+              </div>
+              <div>
+                <dt>Missing vars</dt>
+                <dd>
+                  {config.supabase.missing.length > 0
+                    ? config.supabase.missing.join(", ")
+                    : "None"}
+                </dd>
               </div>
             </dl>
           </section>

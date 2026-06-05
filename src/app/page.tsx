@@ -11,17 +11,18 @@ import { CopyButton } from "@/components/copy-button";
 import { MetricCard } from "@/components/metric-card";
 import { OrderStatusBadge, PaymentStatusBadge } from "@/components/status-badge";
 import { formatBdt } from "@/lib/domain/money";
-import { demoShop } from "@/lib/domain/seed";
+import { getActiveShop } from "@/lib/store/active-shop";
 import { getRepository } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
   const repo = getRepository();
+  const shop = await getActiveShop(repo);
   const [orders, products, templates] = await Promise.all([
-    repo.listOrders(demoShop.id),
-    repo.listProducts(demoShop.id),
-    repo.listReplyTemplates(demoShop.id)
+    repo.listOrders(shop.id),
+    repo.listProducts(shop.id),
+    repo.listReplyTemplates(shop.id)
   ]);
   const today = new Date().toDateString();
   const ordersToday = orders.filter(
@@ -36,7 +37,7 @@ export default async function DashboardPage() {
   const firstProduct = products[0];
   const firstTemplate = templates[0];
   const orderLink = firstProduct
-    ? `/order/${demoShop.slug}/${firstProduct.slug}`
+    ? `/order/${shop.slug}/${firstProduct.slug}`
     : "/";
 
   return (
