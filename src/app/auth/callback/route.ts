@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getRuntimeConfig } from "@/lib/config/env";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createWritableServerSupabaseClient } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
@@ -8,7 +8,7 @@ export async function GET(request: Request) {
   const config = getRuntimeConfig();
 
   if (code && config.supabase.isConfigured) {
-    const supabase = await createServerSupabaseClient();
+    const supabase = await createWritableServerSupabaseClient();
     await supabase.auth.exchangeCodeForSession(code);
   }
 
