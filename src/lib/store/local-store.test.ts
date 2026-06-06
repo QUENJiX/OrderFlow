@@ -95,4 +95,35 @@ describe("createLocalRepository", () => {
       message: "price?"
     });
   });
+
+  it("updates shop operational fields", async () => {
+    const repo = createLocalRepository();
+    const shop = await repo.updateShop(demoShop.id, {
+      defaultDistrict: "Chattogram",
+      plan: "starter",
+      status: "active",
+      supportNotes: "Needs onboarding call"
+    });
+
+    expect(shop).toMatchObject({
+      defaultDistrict: "Chattogram",
+      plan: "starter",
+      status: "active",
+      supportNotes: "Needs onboarding call"
+    });
+  });
+
+  it("updates billing record status and notes", async () => {
+    const repo = createLocalRepository();
+    const records = await repo.listBillingRecords(demoShop.id);
+    const billing = await repo.updateBillingRecord(records[0].id, {
+      notes: "Paid by bank transfer",
+      status: "paid"
+    });
+
+    expect(billing).toMatchObject({
+      notes: "Paid by bank transfer",
+      status: "paid"
+    });
+  });
 });

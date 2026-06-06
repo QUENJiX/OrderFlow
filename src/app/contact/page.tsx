@@ -1,8 +1,8 @@
-import { AppShell } from "@/components/app-shell";
+import { PublicPageShell } from "@/components/public-page-shell";
 
 export default function ContactPage() {
   return (
-    <AppShell
+    <PublicPageShell
       title="Contact"
       description="Support details for the OrderFlow BD pilot."
     >
@@ -15,6 +15,6 @@ export default function ContactPage() {
         <p>Phone: +8801711122233</p>
         <p>Location: Dhaka, Bangladesh</p>
       </section>
-    </AppShell>
+    </PublicPageShell>
   );
 }

@@ -299,6 +299,12 @@ on public.shops for select
 to authenticated
 using (public.is_platform_admin());
 
+create policy "platform admins can update shops"
+on public.shops for update
+to authenticated
+using (public.is_platform_admin())
+with check (public.is_platform_admin());
+
 create policy "public can read active shop links"
 on public.shops for select
 to anon, authenticated
@@ -400,6 +406,12 @@ create policy "platform admins can read all billing"
 on public.billing_records for select
 to authenticated
 using (public.is_platform_admin());
+
+create policy "platform admins can update billing"
+on public.billing_records for update
+to authenticated
+using (public.is_platform_admin())
+with check (public.is_platform_admin());
 
 create policy "members can read webhook events"
 on public.webhook_events for select

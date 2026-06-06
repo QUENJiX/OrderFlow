@@ -3,6 +3,7 @@ import { getRuntimeConfig, type RuntimeConfig } from "../config/env";
 import { calculateOrderTotals } from "../domain/money";
 import type {
   BillingRecord,
+  BillingRecordPatch,
   CourierProvider,
   Customer,
   Order,
@@ -17,6 +18,7 @@ import type {
   ReplyLanguage,
   ReplyTemplate,
   Shop,
+  ShopPatch,
   ShopPlan,
   ShopStatus,
   WebhookEvent
@@ -199,6 +201,29 @@ function productInputToRow(input: ProductInput) {
   };
 }
 
+function shopPatchToRow(patch: ShopPatch) {
+  return {
+    billing_notes: patch.billingNotes,
+    default_courier: patch.defaultCourier,
+    default_district: patch.defaultDistrict,
+    email: patch.email,
+    logo_url: patch.logoUrl,
+    owner_name: patch.ownerName,
+    phone: patch.phone,
+    plan: patch.plan,
+    status: patch.status,
+    support_notes: patch.supportNotes,
+    support_phone: patch.supportPhone
+  };
+}
+
+function billingPatchToRow(patch: BillingRecordPatch) {
+  return {
+    notes: patch.notes,
+    status: patch.status
+  };
+}
+
 function orderPatchToRow(patch: OrderPatch) {
   return {
     status: patch.status,
@@ -253,6 +278,19 @@ export function createSupabaseRepository(
       const supabase = await getClient();
       const rows = await unwrapList(supabase.from("shops").select("*").order("created_at"));
       return rows.map(mapShopRow);
+    },
+
+    async updateShop(shopId, patch) {
+      const supabase = await getClient();
+      const row = await unwrapSingle(
+        supabase
+          .from("shops")
+          .update(shopPatchToRow(patch))
+          .eq("id", shopId)
+          .select("*")
+          .single()
+      );
+      return mapShopRow(row);
     },
 
     async listProducts(shopId) {
@@ -478,6 +516,19 @@ export function createSupabaseRepository(
           .order("created_at", { ascending: false })
       );
       return rows.map(mapBillingRow);
+    },
+
+    async updateBillingRecord(billingId, patch) {
+      const supabase = await getClient();
+      const row = await unwrapSingle(
+        supabase
+          .from("billing_records")
+          .update(billingPatchToRow(patch))
+          .eq("id", billingId)
+          .select("*")
+          .single()
+      );
+      return mapBillingRow(row);
     }
   };
 }

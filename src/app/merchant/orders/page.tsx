@@ -5,7 +5,7 @@ import { requireMerchantShop } from "@/lib/auth/session";
 export const dynamic = "force-dynamic";
 
 export default async function MerchantOrdersPage() {
-  const { repo, shop } = await requireMerchantShop();
+  const { repo, shop, user } = await requireMerchantShop();
   const [orders, products] = await Promise.all([
     repo.listOrders(shop.id),
     repo.listProducts(shop.id)
@@ -15,6 +15,8 @@ export default async function MerchantOrdersPage() {
     <AppShell
       title="Orders"
       description="Process COD/manual MFS orders into courier-ready shipments."
+      shop={shop}
+      user={user}
     >
       <OrdersWorkspace initialOrders={orders} products={products} />
     </AppShell>

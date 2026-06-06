@@ -1,8 +1,8 @@
-import { AppShell } from "@/components/app-shell";
+import { PublicPageShell } from "@/components/public-page-shell";
 
 export default function TermsPage() {
   return (
-    <AppShell
+    <PublicPageShell
       title="Terms of Service"
       description="Pilot terms for merchants using OrderFlow BD."
     >
@@ -23,6 +23,6 @@ export default function TermsPage() {
           subject to each provider&apos;s approval, availability, and terms.
         </p>
       </section>
-    </AppShell>
+    </PublicPageShell>
   );
 }

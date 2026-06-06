@@ -1,9 +1,9 @@
-import { AppShell } from "@/components/app-shell";
+import { PublicPageShell } from "@/components/public-page-shell";
 import type { ReactNode } from "react";
 
 export default function PrivacyPage() {
   return (
-    <AppShell
+    <PublicPageShell
       title="Privacy Policy"
       description="Public privacy page for OrderFlow BD pilot and Meta readiness."
     >
@@ -29,7 +29,7 @@ export default function PrivacyPage() {
           dispute handling, or legal obligations.
         </p>
       </LegalPanel>
-    </AppShell>
+    </PublicPageShell>
   );
 }
 

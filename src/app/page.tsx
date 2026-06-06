@@ -1,92 +1,111 @@
 import {
   ArrowRight,
+  CheckCircle2,
   ClipboardList,
   MessageCircle,
   PackageCheck,
-  ShieldCheck
+  WalletCards
 } from "lucide-react";
 import Link from "next/link";
 
 const workflow = [
   {
     icon: MessageCircle,
-    title: "Reply with a clean order link",
-    text: "Send customers a product-specific link from comments, Messenger, or WhatsApp."
+    title: "Reply from Facebook fast",
+    text: "Copy a product-aware Bangla or English reply with the order link already filled."
   },
   {
-    icon: ClipboardList,
-    title: "Capture COD and manual MFS orders",
-    text: "Collect customer name, phone, address, quantity, variant, and payment reference."
+    icon: WalletCards,
+    title: "Verify COD and MFS",
+    text: "Track COD, bKash, and Nagad state before the package moves."
   },
   {
     icon: PackageCheck,
-    title: "Export courier-ready rows",
-    text: "Move confirmed orders into your delivery workflow without spreadsheet chaos."
+    title: "Send courier-ready rows",
+    text: "Export confirmed orders for Steadfast, Pathao, RedX, or manual delivery."
   }
 ];
 
 export default function LandingPage() {
   return (
-    <main className="landing-page">
-      <nav className="landing-nav" aria-label="Public navigation">
+    <main className="marketing-page">
+      <nav className="marketing-nav" aria-label="Public navigation">
         <Link className="brand" href="/">
           <span className="brand-mark">OF</span>
           <span>
             <strong>OrderFlow BD</strong>
-            <small>F-commerce order desk</small>
+            <small>Facebook orders, cleaned up</small>
           </span>
         </Link>
         <div className="landing-actions">
-          <Link className="secondary-button" href="/merchant/login">
+          <Link className="secondary-button" href="/control/login">
+            Control login
+          </Link>
+          <Link className="primary-button" href="/merchant/login">
             Merchant login
           </Link>
         </div>
       </nav>
 
-      <section className="landing-hero">
-        <div className="landing-copy">
-          <h1>Turn Facebook interest into confirmed orders.</h1>
+      <section className="marketing-hero">
+        <div className="hero-copy">
+          <h1>From Facebook comment to courier-ready order.</h1>
           <p>
-            OrderFlow gives Bangladesh F-commerce sellers a merchant workspace,
-            public order links, COD/manual payment tracking, and courier-ready
-            exports.
+            OrderFlow BD gives F-commerce sellers a premium order desk for
+            product links, COD/manual bKash checks, reply templates, and courier
+            export without spreadsheet chaos.
           </p>
           <div className="hero-actions">
             <Link className="primary-button" href="/merchant/login">
-              Start merchant setup
-              <ArrowRight size={16} />
+              Start merchant workspace
+              <ArrowRight size={16} aria-hidden />
             </Link>
-            <Link
-              className="secondary-button"
-              href="#workflow"
-            >
-              See workflow
+            <Link className="secondary-button" href="#workflow">
+              See daily flow
             </Link>
+          </div>
+          <div className="hero-proof">
+            <span><CheckCircle2 size={15} /> COD first</span>
+            <span><CheckCircle2 size={15} /> bKash/Nagad manual checks</span>
+            <span><CheckCircle2 size={15} /> Courier CSV</span>
           </div>
         </div>
 
-        <div className="landing-product-shot" aria-label="OrderFlow dashboard preview">
-          <div className="shot-bar">
-            <span />
-            <span />
-            <span />
+        <div className="hero-console" aria-label="OrderFlow order desk preview">
+          <div className="console-header">
+            <div>
+              <span>Today’s order desk</span>
+              <strong>Dhaka drop · 18 orders</strong>
+            </div>
+            <span className="badge badge-success">Live</span>
           </div>
-          <div className="shot-grid">
-            <div className="shot-card">
-              <small>Orders today</small>
+          <div className="console-grid">
+            <article>
+              <span>Payment checks</span>
+              <strong>6</strong>
+              <small>bKash/Nagad awaiting verification</small>
+            </article>
+            <article>
+              <span>Courier ready</span>
+              <strong>9</strong>
+              <small>Batch export for Steadfast</small>
+            </article>
+          </div>
+          <div className="console-list">
+            <div>
+              <ClipboardList size={18} aria-hidden />
+              <span>Shila Akter · Linen Kurti · COD</span>
               <strong>New</strong>
-              <span>New customer submissions</span>
             </div>
-            <div className="shot-card">
-              <small>Courier ready</small>
-              <strong>Ready</strong>
-              <span>Needs delivery action</span>
+            <div>
+              <WalletCards size={18} aria-hidden />
+              <span>Tanvir Store · Nagad reference</span>
+              <strong>Check</strong>
             </div>
-            <div className="shot-list">
-              <p>Recent orders</p>
-              <div><span>Customer order</span><strong>COD</strong></div>
-              <div><span>Payment check</span><strong>bKash</strong></div>
-              <div><span>Courier export</span><strong>CSV</strong></div>
+            <div>
+              <PackageCheck size={18} aria-hidden />
+              <span>12 packed orders · Pathao CSV</span>
+              <strong>Export</strong>
             </div>
           </div>
         </div>
@@ -103,18 +122,6 @@ export default function LandingPage() {
             </article>
           );
         })}
-      </section>
-
-      <section className="landing-admin-note">
-        <ShieldCheck size={22} />
-        <div>
-          <h2>Separate platform control</h2>
-          <p>
-            Merchant access and developer/admin access are separate. The control
-            room is hidden from public navigation and requires platform admin
-            membership.
-          </p>
-        </div>
       </section>
     </main>
   );

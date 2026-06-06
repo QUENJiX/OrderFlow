@@ -1,6 +1,6 @@
-import { CheckCircle2, CircleDashed } from "lucide-react";
+import { CheckCircle2, ShieldCheck } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
-import { getRuntimeConfig } from "@/lib/config/env";
+import { MerchantSettingsForm } from "@/components/merchant-settings-form";
 import { COURIER_LABELS } from "@/lib/domain/types";
 import { requireMerchantShop } from "@/lib/auth/session";
 
@@ -8,46 +8,43 @@ export const dynamic = "force-dynamic";
 
 const integrations = [
   {
-    name: "Supabase Auth + Postgres",
-    status: "Connected",
-    detail:
-      "Merchant access, shop membership, product catalog, and order storage are backed by Supabase."
-  },
-  {
-    name: "Meta Page automation",
+    name: "Meta Page replies",
     status: "Manual first",
     detail:
-      "Webhook verification and simulated comment events exist. OAuth and real replies are deferred."
+      "Use copy-ready replies now. Real page automation comes after manual pilots prove the workflow."
   },
   {
-    name: "Payments",
+    name: "bKash/Nagad checks",
     status: "Manual mode",
     detail:
-      "COD, manual bKash, and manual Nagad are tracked. Gateways plug into the payment adapter later."
+      "Track manual references and mark payments verified from the orders workspace."
   },
   {
-    name: "Courier APIs",
+    name: "Courier handoff",
     status: "CSV first",
     detail:
-      "Generic CSV export is active. Steadfast, Pathao, RedX, and eCourier adapters can be added later."
+      "Export courier-ready orders for Steadfast, Pathao, RedX, eCourier, or manual delivery."
   }
 ];
 
 export default async function MerchantSettingsPage() {
-  const config = getRuntimeConfig();
-  const { shop } = await requireMerchantShop();
+  const { shop, user } = await requireMerchantShop();
 
   return (
     <AppShell
       title="Settings"
-      description="Shop profile and integration readiness."
+      description="Shop details, order defaults, and account access."
+      shop={shop}
+      user={user}
     >
       <div className="settings-grid">
+        <MerchantSettingsForm shop={shop} />
+
         <section className="panel">
           <div className="panel-heading">
             <div>
-              <h2>Shop profile</h2>
-              <p>Your active merchant workspace.</p>
+              <h2>Order defaults</h2>
+              <p>Operational defaults used when orders enter the desk.</p>
             </div>
           </div>
           <dl className="detail-list">
@@ -77,24 +74,17 @@ export default async function MerchantSettingsPage() {
         <section className="panel">
           <div className="panel-heading">
             <div>
-              <h2>Runtime mode</h2>
-              <p>Production mode uses Supabase Auth, RLS, and shop membership.</p>
+              <h2>Account access</h2>
+              <p>Your login controls this merchant workspace.</p>
             </div>
           </div>
-          <dl className="detail-list">
+          <div className="access-card">
+            <ShieldCheck size={22} aria-hidden />
             <div>
-              <dt>Current mode</dt>
-              <dd>{config.mode}</dd>
+              <strong>{user.email ?? "Merchant account"}</strong>
+              <span>Owner access · {shop.status}</span>
             </div>
-            <div>
-              <dt>Supabase URL</dt>
-              <dd>{config.supabase.url ? "Configured" : "Missing"}</dd>
-            </div>
-            <div>
-              <dt>Public key</dt>
-              <dd>{config.supabase.publishableKey ? "Configured" : "Missing"}</dd>
-            </div>
-          </dl>
+          </div>
         </section>
 
         <section className="panel">
@@ -105,9 +95,9 @@ export default async function MerchantSettingsPage() {
             </div>
           </div>
           <div className="integration-list">
-            {integrations.map((integration, index) => (
+            {integrations.map((integration) => (
               <article className="integration-row" key={integration.name}>
-                {index === 0 ? <CheckCircle2 size={20} /> : <CircleDashed size={20} />}
+                <CheckCircle2 size={20} />
                 <div>
                   <strong>{integration.name}</strong>
                   <span>{integration.status}</span>

@@ -1,69 +1,63 @@
-import {
-  Boxes,
-  ClipboardList,
-  FileText,
-  Home,
-  Settings,
-  Sparkles
-} from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
-
-const navItems = [
-  { href: "/merchant/dashboard", label: "Dashboard", icon: Home },
-  { href: "/merchant/products", label: "Products", icon: Boxes },
-  { href: "/merchant/orders", label: "Orders", icon: ClipboardList },
-  { href: "/merchant/templates", label: "Templates", icon: FileText },
-  { href: "/merchant/settings", label: "Settings", icon: Settings }
-];
+import { getRuntimeConfig } from "@/lib/config/env";
+import type { Shop } from "@/lib/domain/types";
+import type { AuthenticatedUser } from "@/lib/auth/session";
+import { MerchantNav } from "./merchant-nav";
+import { SignOutButton } from "./sign-out-button";
 
 export function AppShell({
   title,
   description,
   children,
-  actions
+  actions,
+  shop,
+  user
 }: {
   title: string;
   description?: string;
   children: ReactNode;
   actions?: ReactNode;
+  shop: Shop;
+  user: AuthenticatedUser;
 }) {
+  const config = getRuntimeConfig();
+
   return (
     <div className="app-shell">
       <aside className="sidebar">
-        <Link className="brand" href="/">
+        <Link className="brand" href="/merchant/dashboard">
           <span className="brand-mark">OF</span>
           <span>
             <strong>OrderFlow BD</strong>
-            <small>Merchant workspace</small>
+            <small>Merchant order desk</small>
           </span>
         </Link>
-        <nav className="side-nav" aria-label="Main navigation">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <Link href={item.href} key={item.href}>
-                <Icon size={18} aria-hidden />
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
-        <div className="local-mode">
-          <Sparkles size={18} aria-hidden />
-          <span>
-            Merchant access is controlled by Supabase Auth and shop membership.
-          </span>
+        <MerchantNav />
+        <div className="shop-card">
+          <span>Active shop</span>
+          <strong>{shop.name}</strong>
+          <small>{shop.plan} · {shop.status}</small>
         </div>
       </aside>
       <main className="main-panel">
-        <header className="page-header">
-          <div>
-            <p className="section-label">OrderFlow BD</p>
+        <header className="ops-topbar">
+          <div className="topbar-title">
             <h1>{title}</h1>
             {description ? <p>{description}</p> : null}
           </div>
-          {actions ? <div className="header-actions">{actions}</div> : null}
+          <div className="topbar-actions">
+            {actions}
+            <div className="account-chip">
+              <span>{user.email ?? "Merchant"}</span>
+              <SignOutButton
+                isSupabaseConfigured={config.supabase.isConfigured}
+                redirectPath="/merchant/login"
+                supabasePublishableKey={config.supabase.publishableKey}
+                supabaseUrl={config.supabase.url}
+              />
+            </div>
+          </div>
         </header>
         {children}
       </main>

@@ -51,6 +51,23 @@ export type Shop = {
   updatedAt: string;
 };
 
+export type ShopPatch = Partial<
+  Pick<
+    Shop,
+    | "billingNotes"
+    | "defaultCourier"
+    | "defaultDistrict"
+    | "email"
+    | "logoUrl"
+    | "ownerName"
+    | "phone"
+    | "plan"
+    | "status"
+    | "supportNotes"
+    | "supportPhone"
+  >
+>;
+
 export type ProductVariant = {
   name: string;
   stock: number;
@@ -139,6 +156,8 @@ export type BillingRecord = {
   notes: string;
   createdAt: string;
 };
+
+export type BillingRecordPatch = Partial<Pick<BillingRecord, "notes" | "status">>;
 
 export type FieldErrors = Record<string, string>;
 

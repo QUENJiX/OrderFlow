@@ -1,8 +1,8 @@
-import { AppShell } from "@/components/app-shell";
+import { PublicPageShell } from "@/components/public-page-shell";
 
 export default function DataDeletionPage() {
   return (
-    <AppShell
+    <PublicPageShell
       title="Data Deletion"
       description="How merchants or customers can request deletion."
     >
@@ -19,6 +19,6 @@ export default function DataDeletionPage() {
         </p>
         <p>Email: support@orderflowbd.example</p>
       </section>
-    </AppShell>
+    </PublicPageShell>
   );
 }

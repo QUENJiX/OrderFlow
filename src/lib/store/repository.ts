@@ -1,5 +1,6 @@
 import type {
   BillingRecord,
+  BillingRecordPatch,
   Id,
   Order,
   OrderInput,
@@ -8,6 +9,7 @@ import type {
   ProductInput,
   ReplyTemplate,
   Shop,
+  ShopPatch,
   WebhookEvent
 } from "../domain/types";
 
@@ -17,6 +19,7 @@ export type OrderFlowRepository = {
   getShopBySlug(slug: string): Promise<Shop | undefined>;
   getShopById(id: Id): Promise<Shop | undefined>;
   listShops(): Promise<Shop[]>;
+  updateShop(shopId: Id, patch: ShopPatch): Promise<Shop>;
   listProducts(shopId: Id): Promise<Product[]>;
   getProductBySlug(shopSlug: string, productSlug: string): Promise<Product | undefined>;
   getProductById(productId: Id): Promise<Product | undefined>;
@@ -31,4 +34,5 @@ export type OrderFlowRepository = {
   listWebhookEvents(shopId: Id): Promise<WebhookEvent[]>;
   recordWebhookEvent(input: WebhookEventInput): Promise<WebhookEvent>;
   listBillingRecords(shopId: Id): Promise<BillingRecord[]>;
+  updateBillingRecord(billingId: Id, patch: BillingRecordPatch): Promise<BillingRecord>;
 };

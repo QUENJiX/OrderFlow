@@ -10,27 +10,24 @@ import { AppShell } from "@/components/app-shell";
 import { CopyButton } from "@/components/copy-button";
 import { MetricCard } from "@/components/metric-card";
 import { OrderStatusBadge, PaymentStatusBadge } from "@/components/status-badge";
+import { buildMerchantDashboardSummary } from "@/lib/domain/analytics";
 import { formatBdt } from "@/lib/domain/money";
 import { requireMerchantShop } from "@/lib/auth/session";
 
 export const dynamic = "force-dynamic";
 
 export default async function MerchantDashboardPage() {
-  const { repo, shop } = await requireMerchantShop();
+  const { repo, shop, user } = await requireMerchantShop();
   const [orders, products, templates] = await Promise.all([
     repo.listOrders(shop.id),
     repo.listProducts(shop.id),
     repo.listReplyTemplates(shop.id)
   ]);
-  const today = new Date().toDateString();
-  const ordersToday = orders.filter(
-    (order) => new Date(order.createdAt).toDateString() === today
-  );
+  const summary = buildMerchantDashboardSummary({ orders, products });
   const courierReady = orders.filter((order) => order.status === "courier_ready");
-  const pendingPayments = orders.filter(
-    (order) => order.paymentStatus === "awaiting_verification"
+  const pendingPayments = orders.filter((order) =>
+    ["awaiting_verification", "failed"].includes(order.paymentStatus)
   );
-  const revenue = orders.reduce((sum, order) => sum + order.total, 0);
   const productById = new Map(products.map((product) => [product.id, product]));
   const firstProduct = products[0];
   const firstTemplate = templates[0];
@@ -40,8 +37,10 @@ export default async function MerchantDashboardPage() {
 
   return (
     <AppShell
-      title="Merchant dashboard"
-      description="A practical order desk for manual Facebook inquiry to COD courier workflow."
+      title="Today’s order desk"
+      description="Prioritize payment checks, courier prep, and reply links from one operating screen."
+      shop={shop}
+      user={user}
       actions={
         <Link className="secondary-button" href="/api/orders/export" prefetch={false}>
           <Download size={16} />
@@ -54,34 +53,52 @@ export default async function MerchantDashboardPage() {
           detail="New customer submissions"
           icon={<ClipboardList size={18} />}
           label="Orders today"
-          value={ordersToday.length}
+          value={summary.ordersToday}
         />
         <MetricCard
           detail="All captured orders"
           icon={<WalletCards size={18} />}
           label="Order value"
-          value={formatBdt(revenue)}
+          value={formatBdt(summary.orderValue)}
         />
         <MetricCard
           detail="Needs courier action"
           icon={<Timer size={18} />}
           label="Courier ready"
-          value={courierReady.length}
+          value={summary.courierReady}
         />
         <MetricCard
           detail="Manual bKash/Nagad"
           icon={<Boxes size={18} />}
           label="Pending payment"
-          value={pendingPayments.length}
+          value={summary.pendingPayments}
         />
+      </section>
+
+      <section className="action-strip">
+        <div>
+          <span>Next best actions</span>
+          <strong>{pendingPayments.length} payment checks</strong>
+          <small>Verify bKash/Nagad references before packing.</small>
+        </div>
+        <div>
+          <span>Courier queue</span>
+          <strong>{courierReady.length} ready</strong>
+          <small>Export CSV when the batch is packed.</small>
+        </div>
+        <div>
+          <span>Catalog attention</span>
+          <strong>{summary.lowStockProducts} low stock</strong>
+          <small>Update inventory before sending more links.</small>
+        </div>
       </section>
 
       <div className="dashboard-grid">
         <section className="panel">
           <div className="panel-heading">
             <div>
-              <h2>Recent orders</h2>
-              <p>New customer submissions from public order links.</p>
+              <h2>Live order queue</h2>
+              <p>Newest orders and the state that needs merchant action.</p>
             </div>
           </div>
           <div className="stack-list">
@@ -108,8 +125,8 @@ export default async function MerchantDashboardPage() {
         <section className="panel">
           <div className="panel-heading">
             <div>
-              <h2>Daily shortcuts</h2>
-              <p>Copy links and replies without hunting through the app.</p>
+              <h2>Reply launcher</h2>
+              <p>Copy the fastest order link or reply for today’s comments.</p>
             </div>
           </div>
           <div className="shortcut-list">

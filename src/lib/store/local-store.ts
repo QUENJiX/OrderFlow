@@ -9,10 +9,12 @@ import {
 import { calculateOrderTotals } from "../domain/money";
 import type {
   BillingRecord,
+  BillingRecordPatch,
   Order,
   Product,
   ReplyTemplate,
   Shop,
+  ShopPatch,
   WebhookEvent
 } from "../domain/types";
 import { validateOrderInput, validateProductInput } from "../domain/validation";
@@ -87,6 +89,20 @@ export function createLocalRepository(
 
     async listShops() {
       return clone(state.shops);
+    },
+
+    async updateShop(shopId, patch: ShopPatch) {
+      const index = state.shops.findIndex((shop) => shop.id === shopId);
+      if (index === -1) {
+        throw new Error("Shop not found");
+      }
+
+      state.shops[index] = {
+        ...state.shops[index],
+        ...patch,
+        updatedAt: new Date().toISOString()
+      };
+      return clone(state.shops[index]);
     },
 
     async listProducts(shopId) {
@@ -259,6 +275,21 @@ export function createLocalRepository(
       return clone(
         state.billingRecords.filter((record) => record.shopId === shopId)
       );
+    },
+
+    async updateBillingRecord(billingId, patch: BillingRecordPatch) {
+      const index = state.billingRecords.findIndex(
+        (record) => record.id === billingId
+      );
+      if (index === -1) {
+        throw new Error("Billing record not found");
+      }
+
+      state.billingRecords[index] = {
+        ...state.billingRecords[index],
+        ...patch
+      };
+      return clone(state.billingRecords[index]);
     }
   };
 }
