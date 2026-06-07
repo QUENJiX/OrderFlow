@@ -14,6 +14,15 @@ function futureDate(days: number) {
   return new Date(Date.now() + days * oneDay).toISOString();
 }
 
+// Anchored to local noon so demo orders always land on distinct calendar
+// days regardless of the time of day the seed module is evaluated.
+function daysAgoAtNoon(days: number) {
+  const date = new Date();
+  date.setHours(12, 0, 0, 0);
+  date.setDate(date.getDate() - days);
+  return date.toISOString();
+}
+
 export const demoShop: Shop = {
   id: "shop_nur_fashion",
   slug: "nur-fashion",
@@ -154,8 +163,8 @@ export const demoOrders: Order[] = [
     total: 1530,
     slaDeadline: futureDate(5),
     customerNotes: "Please call before delivery.",
-    createdAt: new Date(Date.now() - oneDay / 2).toISOString(),
-    updatedAt: new Date(Date.now() - oneDay / 2).toISOString()
+    createdAt: daysAgoAtNoon(0),
+    updatedAt: daysAgoAtNoon(0)
   },
   {
     id: "ord_1002",
@@ -180,8 +189,8 @@ export const demoOrders: Order[] = [
     total: 4300,
     slaDeadline: futureDate(7),
     merchantNotes: "Verify bKash before packing.",
-    createdAt: new Date(Date.now() - oneDay).toISOString(),
-    updatedAt: new Date(Date.now() - oneDay / 3).toISOString()
+    createdAt: daysAgoAtNoon(1),
+    updatedAt: daysAgoAtNoon(1)
   },
   {
     id: "ord_1003",
@@ -204,8 +213,8 @@ export const demoOrders: Order[] = [
     deliveryCharge: 60,
     total: 2010,
     slaDeadline: futureDate(10),
-    createdAt: new Date(Date.now() - oneDay * 2).toISOString(),
-    updatedAt: new Date(Date.now() - oneDay / 4).toISOString()
+    createdAt: daysAgoAtNoon(2),
+    updatedAt: daysAgoAtNoon(2)
   }
 ];
 
