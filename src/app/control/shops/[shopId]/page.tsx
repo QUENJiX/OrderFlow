@@ -1,8 +1,13 @@
+import { ArrowLeft, Boxes, ClipboardList, Radio, WalletCards } from "lucide-react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ControlBillingQueue } from "@/components/control-billing-queue";
 import { ControlShopTable } from "@/components/control-shop-table";
-import { MetricCard } from "@/components/metric-card";
+import { PaymentStatusBadge } from "@/components/status-badge";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Stat } from "@/components/ui/stat";
 import { buildPlatformOverview } from "@/lib/domain/analytics";
 import { formatBdt } from "@/lib/domain/money";
 import { requirePlatformAdmin } from "@/lib/auth/session";
@@ -34,65 +39,112 @@ export default async function ControlShopPage({
   });
 
   return (
-    <main className="control-page">
-      <header className="control-header">
-        <Link className="brand" href="/control">
-          <span className="brand-mark">OF</span>
-          <span>
-            <strong>{shop.name}</strong>
-            <small>Merchant drilldown</small>
-          </span>
-        </Link>
-        <Link className="secondary-button" href="/control">
-          Back to control
-        </Link>
+    <div className="min-h-screen bg-background">
+      <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-md">
+        <div className="mx-auto flex max-w-[1400px] items-center gap-3 px-4 py-2.5 lg:px-6">
+          <Button asChild size="icon-sm" variant="ghost">
+            <Link href="/control" title="Back to control">
+              <ArrowLeft />
+            </Link>
+          </Button>
+          <div className="leading-tight">
+            <div className="text-sm font-semibold">{shop.name}</div>
+            <div className="font-mono text-xs text-muted-foreground">
+              {shop.slug}
+            </div>
+          </div>
+          <Badge className="ml-1 capitalize" tone="info">
+            {shop.plan}
+          </Badge>
+          <Badge className="capitalize" tone="neutral">
+            {shop.status}
+          </Badge>
+        </div>
       </header>
 
-      <section className="page-header control-title">
-        <div>
-          <p className="section-label">Merchant</p>
-          <h1>{shop.name}</h1>
-          <p>{shop.slug} · {shop.plan} · {shop.status}</p>
+      <main className="mx-auto max-w-[1400px] px-4 py-6 lg:px-6">
+        <div className="mb-6">
+          <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+            Merchant
+          </p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight">
+            {shop.name}
+          </h1>
         </div>
-      </section>
 
-      <section className="metrics-grid">
-        <MetricCard label="Orders" value={orders.length} detail="Captured order links" />
-        <MetricCard
-          label="Order value"
-          value={formatBdt(orders.reduce((sum, order) => sum + order.total, 0))}
-          detail="Gross order value"
-        />
-        <MetricCard label="Products" value={products.length} detail="Catalog items" />
-        <MetricCard label="Events" value={events.length} detail="Webhook/test signals" />
-      </section>
-
-      <div className="control-grid">
-        <ControlShopTable rows={overview.merchantRows} />
-        <ControlBillingQueue records={billing} />
-      </div>
-
-      <section className="panel control-panel">
-        <div className="panel-heading">
-          <div>
-            <h2>Recent orders</h2>
-            <p>Latest customer orders for this merchant.</p>
-          </div>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <Stat
+            detail="Captured order links"
+            icon={<ClipboardList />}
+            label="Orders"
+            value={orders.length}
+          />
+          <Stat
+            detail="Gross order value"
+            icon={<WalletCards />}
+            label="Order value"
+            value={formatBdt(
+              orders.reduce((sum, order) => sum + order.total, 0)
+            )}
+          />
+          <Stat
+            detail="Catalog items"
+            icon={<Boxes />}
+            label="Products"
+            value={products.length}
+          />
+          <Stat
+            detail="Webhook/test signals"
+            icon={<Radio />}
+            label="Events"
+            value={events.length}
+          />
         </div>
-        <div className="stack-list">
-          {orders.slice(0, 8).map((order) => (
-            <article className="compact-row" key={order.id}>
+
+        <div className="mt-3">
+          <ControlShopTable rows={overview.merchantRows} />
+        </div>
+
+        <div className="mt-3 grid gap-3 lg:grid-cols-2">
+          <ControlBillingQueue records={billing} />
+          <Card>
+            <CardHeader>
               <div>
-                <strong>{order.customer.name}</strong>
-                <span>
-                  {order.customer.phone} · {formatBdt(order.total)} · {order.status}
-                </span>
+                <CardTitle>Recent orders</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Latest customer orders for this merchant.
+                </p>
               </div>
-              <span className="badge badge-info">{order.paymentStatus}</span>
-            </article>
-          ))}
+            </CardHeader>
+            <CardContent className="p-0">
+              {orders.length === 0 ? (
+                <p className="p-6 text-center text-sm text-muted-foreground">
+                  No orders yet.
+                </p>
+              ) : (
+                <ul className="divide-y divide-border">
+                  {orders.slice(0, 8).map((order) => (
+                    <li
+                      className="flex items-center justify-between gap-3 px-4 py-3"
+                      key={order.id}
+                    >
+                      <div className="min-w-0">
+                        <div className="truncate text-sm font-medium">
+                          {order.customer.name}
+                        </div>
+                        <div className="truncate font-mono text-xs text-muted-foreground">
+                          {order.customer.phone} · {formatBdt(order.total)}
+                        </div>
+                      </div>
+                      <PaymentStatusBadge status={order.paymentStatus} />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
         </div>
-      </section>
-    </main>
+      </main>
+    </div>
   );
 }

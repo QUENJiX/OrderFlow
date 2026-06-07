@@ -6,7 +6,7 @@ export default function DataDeletionPage() {
       title="Data Deletion"
       description="How merchants or customers can request deletion."
     >
-      <section className="panel legal-copy">
+      <section className="legal-copy">
         <p>
           To request deletion of merchant, customer, or Facebook-related data,
           contact OrderFlow BD with the shop name, order ID if available, phone

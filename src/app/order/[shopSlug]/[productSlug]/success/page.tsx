@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -21,25 +22,38 @@ export default async function OrderSuccessPage({
   const { orderId } = await searchParams;
 
   return (
-    <main className="success-page">
-      <section className="success-card">
-        <CheckCircle2 size={42} />
-        <p className="section-label">Order received</p>
-        <h1>Thanks, your order request is saved.</h1>
-        <p>
-          The seller will confirm stock, payment, and courier details soon.
-          Please keep your phone active for delivery calls.
-        </p>
-        {orderId ? <strong>Order ID: {orderId}</strong> : null}
-        <div className="success-actions">
-          <Link className="secondary-button" href={`/order/${shopSlug}/${productSlug}`}>
-            Place another order
-          </Link>
-          <Link className="primary-button" href="/">
-            Merchant dashboard
-          </Link>
+    <main className="grid min-h-screen place-items-center bg-background px-4">
+      <div className="w-full max-w-md rounded-xl border border-border bg-card p-8 text-center shadow-lg">
+        <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-[var(--accent-soft)]">
+          <CheckCircle2 className="size-7 text-primary" />
         </div>
-      </section>
+        <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-primary">
+          Order received
+        </p>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight">
+          Thanks, your order request is saved.
+        </h1>
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+          The seller will confirm stock, payment, and courier details soon. Please
+          keep your phone active for delivery calls.
+        </p>
+        {orderId ? (
+          <div className="mt-4 inline-flex items-center gap-2 rounded-md border border-border bg-muted/50 px-3 py-2 font-mono text-sm">
+            <span className="text-muted-foreground">Order ID</span>
+            <span className="font-medium">{orderId}</span>
+          </div>
+        ) : null}
+        <div className="mt-6 flex flex-wrap justify-center gap-2">
+          <Button asChild variant="secondary">
+            <Link href={`/order/${shopSlug}/${productSlug}`}>
+              Place another order
+            </Link>
+          </Button>
+          <Button asChild>
+            <Link href="/">Back to home</Link>
+          </Button>
+        </div>
+      </div>
     </main>
   );
 }

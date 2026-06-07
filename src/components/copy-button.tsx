@@ -2,6 +2,9 @@
 
 import { Check, Copy } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
+import { Button } from "./ui/button";
+import { IconTip } from "./ui/icon-tip";
 
 export function CopyButton({
   value,
@@ -17,18 +20,21 @@ export function CopyButton({
   async function copy() {
     await navigator.clipboard.writeText(value);
     setCopied(true);
+    toast.success("Copied to clipboard");
     window.setTimeout(() => setCopied(false), 1400);
   }
 
-  return (
-    <button
-      className={compact ? "icon-button" : "secondary-button"}
+  const button = (
+    <Button
       onClick={copy}
-      title={label}
+      size={compact ? "icon-sm" : "sm"}
       type="button"
+      variant={compact ? "ghost" : "secondary"}
     >
-      {copied ? <Check size={16} aria-hidden /> : <Copy size={16} aria-hidden />}
+      {copied ? <Check /> : <Copy />}
       {!compact ? <span>{copied ? "Copied" : label}</span> : null}
-    </button>
+    </Button>
   );
+
+  return compact ? <IconTip label={label}>{button}</IconTip> : button;
 }

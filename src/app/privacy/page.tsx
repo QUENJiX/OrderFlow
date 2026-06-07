@@ -34,5 +34,5 @@ export default function PrivacyPage() {
 }
 
 function LegalPanel({ children }: { children: ReactNode }) {
-  return <section className="panel legal-copy">{children}</section>;
+  return <section className="legal-copy">{children}</section>;
 }

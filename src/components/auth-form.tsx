@@ -3,8 +3,12 @@
 import { LogIn, UserPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
-import { Field } from "./forms";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
 
 type AuthMode = "sign-in" | "sign-up";
 
@@ -26,16 +30,14 @@ export function AuthForm({
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
   const [mode, setMode] = useState<AuthMode>("sign-in");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setMessage("");
 
     if (!isSupabaseConfigured) {
-      setMessage("Supabase is not configured yet. Add env vars and restart.");
+      toast.error("Supabase is not configured yet. Add env vars and restart.");
       return;
     }
 
@@ -47,18 +49,15 @@ export function AuthForm({
       });
 
       if (mode === "sign-up") {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password
-        });
-
+        const { data, error } = await supabase.auth.signUp({ email, password });
         if (error) {
-          setMessage(error.message);
+          toast.error(error.message);
           return;
         }
-
         if (!data.session) {
-          setMessage("Account created. Check your email if confirmation is enabled.");
+          toast.success(
+            "Account created. Check your email if confirmation is enabled."
+          );
           return;
         }
       } else {
@@ -66,9 +65,8 @@ export function AuthForm({
           email,
           password
         });
-
         if (error) {
-          setMessage(error.message);
+          toast.error(error.message);
           return;
         }
       }
@@ -76,78 +74,83 @@ export function AuthForm({
       router.push(redirectPath);
       router.refresh();
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Authentication failed");
+      toast.error(
+        error instanceof Error ? error.message : "Authentication failed"
+      );
     } finally {
       setIsSubmitting(false);
     }
   }
 
   return (
-    <form className="panel form-panel login-panel" onSubmit={submit}>
-      <div className="panel-heading">
-        <div>
-          <h2>{title}</h2>
-          <p>
-            {allowSignUp
-              ? "Create a merchant account or sign in to your existing workspace."
-              : "Developer access is restricted to approved platform admins."}
-          </p>
-        </div>
+    <div className="w-full">
+      <div className="mb-5">
+        <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {allowSignUp
+            ? "Create a merchant account or sign in to your workspace."
+            : "Developer access is restricted to approved platform admins."}
+        </p>
       </div>
+
       {allowSignUp ? (
-        <div className="auth-toggle" role="tablist" aria-label="Auth mode">
-          <button
-            className={mode === "sign-in" ? "filter active" : "filter"}
-            onClick={() => setMode("sign-in")}
-            type="button"
-          >
-            Sign in
-          </button>
-          <button
-            className={mode === "sign-up" ? "filter active" : "filter"}
-            onClick={() => setMode("sign-up")}
-            type="button"
-          >
-            Create account
-          </button>
-        </div>
+        <Tabs
+          className="mb-4"
+          onValueChange={(value) => setMode(value as AuthMode)}
+          value={mode}
+        >
+          <TabsList className="w-full">
+            <TabsTrigger className="flex-1" value="sign-in">
+              Sign in
+            </TabsTrigger>
+            <TabsTrigger className="flex-1" value="sign-up">
+              Create account
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       ) : null}
-      <Field label="Email">
-        <input
-          autoComplete="email"
-          type="email"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-        />
-      </Field>
-      <Field label="Password">
-        <input
-          autoComplete={mode === "sign-up" ? "new-password" : "current-password"}
-          minLength={6}
-          type="password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-        />
-      </Field>
-      {!isSupabaseConfigured ? (
-        <div className="mode-callout">
-          Authentication is disabled until Supabase URL and publishable key are
-          configured.
+
+      <form className="grid gap-3" onSubmit={submit}>
+        <div className="grid gap-1.5">
+          <Label htmlFor="auth-email">Email</Label>
+          <Input
+            autoComplete="email"
+            id="auth-email"
+            onChange={(event) => setEmail(event.target.value)}
+            type="email"
+            value={email}
+          />
         </div>
-      ) : null}
-      {message ? <p className="form-message">{message}</p> : null}
-      <button
-        className="primary-button"
-        disabled={isSubmitting || !isSupabaseConfigured}
-        type="submit"
-      >
-        {mode === "sign-up" ? <UserPlus size={16} /> : <LogIn size={16} />}
-        {isSubmitting
-          ? "Working"
-          : mode === "sign-up"
-            ? "Create account"
-            : "Sign in"}
-      </button>
-    </form>
+        <div className="grid gap-1.5">
+          <Label htmlFor="auth-password">Password</Label>
+          <Input
+            autoComplete={mode === "sign-up" ? "new-password" : "current-password"}
+            id="auth-password"
+            minLength={6}
+            onChange={(event) => setPassword(event.target.value)}
+            type="password"
+            value={password}
+          />
+        </div>
+        {!isSupabaseConfigured ? (
+          <p className="rounded-md border border-[var(--warning)]/40 bg-[var(--warning-soft)] px-3 py-2 text-xs text-[var(--warning)]">
+            Authentication is disabled until Supabase URL and publishable key are
+            configured.
+          </p>
+        ) : null}
+        <Button
+          className="mt-1 w-full"
+          disabled={isSubmitting || !isSupabaseConfigured}
+          type="submit"
+        >
+          {mode === "sign-up" ? <UserPlus /> : <LogIn />}
+          {isSubmitting
+            ? "Working…"
+            : mode === "sign-up"
+              ? "Create account"
+              : "Sign in"}
+        </Button>
+      </form>
+    </div>
   );
 }

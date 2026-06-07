@@ -1,4 +1,3 @@
-import clsx from "clsx";
 import {
   COURIER_LABELS,
   ORDER_STATUS_LABELS,
@@ -7,6 +6,7 @@ import {
   type OrderStatus,
   type PaymentStatus
 } from "@/lib/domain/types";
+import { Badge } from "./ui/badge";
 
 type BadgeTone = "neutral" | "success" | "warning" | "danger" | "info";
 
@@ -31,20 +31,20 @@ const paymentTone: Record<PaymentStatus, BadgeTone> = {
 
 export function OrderStatusBadge({ status }: { status: OrderStatus }) {
   return (
-    <span className={clsx("badge", `badge-${orderTone[status]}`)}>
+    <Badge dot tone={orderTone[status]}>
       {ORDER_STATUS_LABELS[status]}
-    </span>
+    </Badge>
   );
 }
 
 export function PaymentStatusBadge({ status }: { status: PaymentStatus }) {
   return (
-    <span className={clsx("badge", `badge-${paymentTone[status]}`)}>
+    <Badge dot tone={paymentTone[status]}>
       {PAYMENT_STATUS_LABELS[status]}
-    </span>
+    </Badge>
   );
 }
 
 export function CourierBadge({ courier }: { courier: CourierProvider }) {
-  return <span className="badge badge-neutral">{COURIER_LABELS[courier]}</span>;
+  return <Badge tone="neutral">{COURIER_LABELS[courier]}</Badge>;
 }
