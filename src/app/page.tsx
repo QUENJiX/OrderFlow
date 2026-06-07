@@ -47,7 +47,7 @@ export default function LandingPage() {
         </Link>
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          <Button asChild variant="ghost">
+          <Button asChild className="hidden sm:inline-flex" variant="ghost">
             <Link href="/control/login">Control login</Link>
           </Button>
           <Button asChild>
