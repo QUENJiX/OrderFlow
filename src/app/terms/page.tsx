@@ -6,7 +6,7 @@ export default function TermsPage() {
       title="Terms of Service"
       description="Pilot terms for merchants using OrderFlow BD."
     >
-      <section className="panel legal-copy">
+      <section className="legal-copy">
         <p>
           OrderFlow BD is provided as a pilot SaaS tool for managing product
           order links, customer order capture, COD/manual payment tracking, and

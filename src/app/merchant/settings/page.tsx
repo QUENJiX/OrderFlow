@@ -1,6 +1,8 @@
 import { CheckCircle2, ShieldCheck } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { MerchantSettingsForm } from "@/components/merchant-settings-form";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { COURIER_LABELS } from "@/lib/domain/types";
 import { requireMerchantShop } from "@/lib/auth/session";
 
@@ -30,6 +32,14 @@ const integrations = [
 export default async function MerchantSettingsPage() {
   const { shop, user } = await requireMerchantShop();
 
+  const defaults: { label: string; value: string }[] = [
+    { label: "Shop", value: shop.name },
+    { label: "Owner", value: shop.ownerName || "Not set" },
+    { label: "Support phone", value: shop.supportPhone || "Not set" },
+    { label: "Default courier", value: COURIER_LABELS[shop.defaultCourier] },
+    { label: "Plan", value: shop.plan }
+  ];
+
   return (
     <AppShell
       title="Settings"
@@ -37,77 +47,85 @@ export default async function MerchantSettingsPage() {
       shop={shop}
       user={user}
     >
-      <div className="settings-grid">
+      <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.8fr)]">
         <MerchantSettingsForm shop={shop} />
-
-        <section className="panel">
-          <div className="panel-heading">
-            <div>
-              <h2>Order defaults</h2>
-              <p>Operational defaults used when orders enter the desk.</p>
-            </div>
-          </div>
-          <dl className="detail-list">
-            <div>
-              <dt>Shop</dt>
-              <dd>{shop.name}</dd>
-            </div>
-            <div>
-              <dt>Owner</dt>
-              <dd>{shop.ownerName || "Not set"}</dd>
-            </div>
-            <div>
-              <dt>Support phone</dt>
-              <dd>{shop.supportPhone || "Not set"}</dd>
-            </div>
-            <div>
-              <dt>Default courier</dt>
-              <dd>{COURIER_LABELS[shop.defaultCourier]}</dd>
-            </div>
-            <div>
-              <dt>Plan</dt>
-              <dd>{shop.plan}</dd>
-            </div>
-          </dl>
-        </section>
-
-        <section className="panel">
-          <div className="panel-heading">
-            <div>
-              <h2>Account access</h2>
-              <p>Your login controls this merchant workspace.</p>
-            </div>
-          </div>
-          <div className="access-card">
-            <ShieldCheck size={22} aria-hidden />
-            <div>
-              <strong>{user.email ?? "Merchant account"}</strong>
-              <span>Owner access · {shop.status}</span>
-            </div>
-          </div>
-        </section>
-
-        <section className="panel">
-          <div className="panel-heading">
-            <div>
-              <h2>Integration readiness</h2>
-              <p>Core merchant workspace now uses real account ownership.</p>
-            </div>
-          </div>
-          <div className="integration-list">
-            {integrations.map((integration) => (
-              <article className="integration-row" key={integration.name}>
-                <CheckCircle2 size={20} />
-                <div>
-                  <strong>{integration.name}</strong>
-                  <span>{integration.status}</span>
-                  <p>{integration.detail}</p>
+        <div className="grid gap-3">
+          <Card>
+            <CardHeader>
+              <div>
+                <CardTitle>Order defaults</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Defaults used when orders enter the desk.
+                </p>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              <dl className="divide-y divide-border">
+                {defaults.map((row) => (
+                  <div
+                    className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm"
+                    key={row.label}
+                  >
+                    <dt className="text-muted-foreground">{row.label}</dt>
+                    <dd className="font-medium capitalize">{row.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <div>
+                <CardTitle>Account access</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Your login controls this workspace.
+                </p>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-3 rounded-md border border-border bg-muted/40 p-3">
+                <ShieldCheck className="size-5 text-primary" />
+                <div className="min-w-0">
+                  <div className="truncate text-sm font-medium">
+                    {user.email ?? "Merchant account"}
+                  </div>
+                  <div className="text-xs capitalize text-muted-foreground">
+                    Owner access · {shop.status}
+                  </div>
                 </div>
-              </article>
-            ))}
-          </div>
-        </section>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
+
+      <Card className="mt-3">
+        <CardHeader>
+          <div>
+            <CardTitle>Integration readiness</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Core merchant workspace now uses real account ownership.
+            </p>
+          </div>
+        </CardHeader>
+        <CardContent className="grid gap-3 sm:grid-cols-3">
+          {integrations.map((integration) => (
+            <div
+              className="rounded-lg border border-border bg-muted/30 p-4"
+              key={integration.name}
+            >
+              <CheckCircle2 className="size-4 text-primary" />
+              <div className="mt-2 text-sm font-medium">{integration.name}</div>
+              <Badge className="mt-1.5" tone="neutral">
+                {integration.status}
+              </Badge>
+              <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                {integration.detail}
+              </p>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
     </AppShell>
   );
 }

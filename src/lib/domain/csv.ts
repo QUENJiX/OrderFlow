@@ -16,11 +16,12 @@ const headers = [
 
 function sanitizeCell(value: string | number | undefined) {
   const raw = String(value ?? "").replace(/\r?\n/g, " ");
-  if (/[",\n]/.test(raw)) {
-    return `"${raw.replace(/"/g, '""')}"`;
+  const safe = /^[=+\-@]/.test(raw) ? `'${raw}` : raw;
+  if (/[",\n]/.test(safe)) {
+    return `"${safe.replace(/"/g, '""')}"`;
   }
 
-  return raw;
+  return safe;
 }
 
 export function buildCourierCsv(orders: Order[], products: Product[]) {

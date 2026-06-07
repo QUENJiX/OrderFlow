@@ -8,8 +8,10 @@ import {
 import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
 import { CopyButton } from "@/components/copy-button";
-import { MetricCard } from "@/components/metric-card";
 import { OrderStatusBadge, PaymentStatusBadge } from "@/components/status-badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Stat } from "@/components/ui/stat";
 import { buildMerchantDashboardSummary } from "@/lib/domain/analytics";
 import { formatBdt } from "@/lib/domain/money";
 import { requireMerchantShop } from "@/lib/auth/session";
@@ -24,16 +26,26 @@ export default async function MerchantDashboardPage() {
     repo.listReplyTemplates(shop.id)
   ]);
   const summary = buildMerchantDashboardSummary({ orders, products });
-  const courierReady = orders.filter((order) => order.status === "courier_ready");
-  const pendingPayments = orders.filter((order) =>
-    ["awaiting_verification", "failed"].includes(order.paymentStatus)
-  );
   const productById = new Map(products.map((product) => [product.id, product]));
   const firstProduct = products[0];
   const firstTemplate = templates[0];
   const orderLink = firstProduct
     ? `/order/${shop.slug}/${firstProduct.slug}`
     : "/";
+
+  // Real 7-day order-count series for the sparkline + today/yesterday delta.
+  const now = new Date();
+  const dayCounts = Array.from({ length: 7 }, (_, index) => {
+    const day = new Date(now);
+    day.setDate(now.getDate() - (6 - index));
+    const key = day.toDateString();
+    return orders.filter(
+      (order) => new Date(order.createdAt).toDateString() === key
+    ).length;
+  });
+  const todayCount = dayCounts[6];
+  const yesterdayCount = dayCounts[5];
+  const orderDelta = todayCount - yesterdayCount;
 
   return (
     <AppShell
@@ -42,108 +54,121 @@ export default async function MerchantDashboardPage() {
       shop={shop}
       user={user}
       actions={
-        <Link className="secondary-button" href="/api/orders/export" prefetch={false}>
-          <Download size={16} />
-          Export courier CSV
-        </Link>
+        <Button asChild variant="secondary">
+          <Link href="/api/orders/export" prefetch={false}>
+            <Download />
+            <span className="hidden sm:inline">Export courier CSV</span>
+          </Link>
+        </Button>
       }
     >
-      <section className="metrics-grid">
-        <MetricCard
-          detail="New customer submissions"
-          icon={<ClipboardList size={18} />}
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <Stat
+          delta={{
+            value: `${orderDelta >= 0 ? "+" : ""}${orderDelta} vs yesterday`,
+            direction: orderDelta > 0 ? "up" : orderDelta < 0 ? "down" : "flat"
+          }}
+          icon={<ClipboardList />}
           label="Orders today"
+          spark={dayCounts}
           value={summary.ordersToday}
         />
-        <MetricCard
+        <Stat
           detail="All captured orders"
-          icon={<WalletCards size={18} />}
+          icon={<WalletCards />}
           label="Order value"
           value={formatBdt(summary.orderValue)}
         />
-        <MetricCard
+        <Stat
           detail="Needs courier action"
-          icon={<Timer size={18} />}
+          icon={<Timer />}
           label="Courier ready"
           value={summary.courierReady}
         />
-        <MetricCard
+        <Stat
           detail="Manual bKash/Nagad"
-          icon={<Boxes size={18} />}
+          icon={<Boxes />}
           label="Pending payment"
           value={summary.pendingPayments}
         />
-      </section>
+      </div>
 
-      <section className="action-strip">
-        <div>
-          <span>Next best actions</span>
-          <strong>{pendingPayments.length} payment checks</strong>
-          <small>Verify bKash/Nagad references before packing.</small>
-        </div>
-        <div>
-          <span>Courier queue</span>
-          <strong>{courierReady.length} ready</strong>
-          <small>Export CSV when the batch is packed.</small>
-        </div>
-        <div>
-          <span>Catalog attention</span>
-          <strong>{summary.lowStockProducts} low stock</strong>
-          <small>Update inventory before sending more links.</small>
-        </div>
-      </section>
-
-      <div className="dashboard-grid">
-        <section className="panel">
-          <div className="panel-heading">
+      <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.7fr)]">
+        <Card>
+          <CardHeader>
             <div>
-              <h2>Live order queue</h2>
-              <p>Newest orders and the state that needs merchant action.</p>
+              <CardTitle>Live order queue</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Newest orders and the state that needs action.
+              </p>
             </div>
-          </div>
-          <div className="stack-list">
-            {orders.slice(0, 5).map((order) => {
-              const product = productById.get(order.productId);
-              return (
-                <article className="compact-row" key={order.id}>
-                  <div>
-                    <strong>{order.customer.name}</strong>
-                    <span>
-                      {product?.name ?? "Unknown product"} · Qty {order.quantity}
-                    </span>
-                  </div>
-                  <div className="compact-status">
-                    <OrderStatusBadge status={order.status} />
-                    <PaymentStatusBadge status={order.paymentStatus} />
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        </section>
+            <Button asChild size="sm" variant="ghost">
+              <Link href="/merchant/orders">View all</Link>
+            </Button>
+          </CardHeader>
+          <CardContent className="p-0">
+            {orders.length === 0 ? (
+              <p className="p-6 text-center text-sm text-muted-foreground">
+                Orders will appear here as customers submit your links.
+              </p>
+            ) : (
+              <ul className="divide-y divide-border">
+                {orders.slice(0, 6).map((order) => {
+                  const product = productById.get(order.productId);
+                  return (
+                    <li key={order.id}>
+                      <Link
+                        className="flex items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-muted/50"
+                        href="/merchant/orders"
+                      >
+                        <div className="min-w-0">
+                          <div className="truncate text-sm font-medium">
+                            {order.customer.name}
+                          </div>
+                          <div className="truncate text-xs text-muted-foreground">
+                            {product?.name ?? "Unknown product"} · Qty{" "}
+                            {order.quantity}
+                          </div>
+                        </div>
+                        <div className="flex shrink-0 items-center gap-2">
+                          <OrderStatusBadge status={order.status} />
+                          <PaymentStatusBadge status={order.paymentStatus} />
+                        </div>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
 
-        <section className="panel">
-          <div className="panel-heading">
+        <Card>
+          <CardHeader>
             <div>
-              <h2>Reply launcher</h2>
-              <p>Copy the fastest order link or reply for today’s comments.</p>
+              <CardTitle>Reply launcher</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Copy the fastest order link or reply.
+              </p>
             </div>
-          </div>
-          <div className="shortcut-list">
+          </CardHeader>
+          <CardContent className="grid gap-2.5">
             {firstProduct ? (
-              <div className="shortcut-row">
-                <div>
-                  <strong>{firstProduct.name} order link</strong>
-                  <span>{orderLink}</span>
+              <div className="flex items-center justify-between gap-3 rounded-md border border-border bg-muted/40 p-3">
+                <div className="min-w-0">
+                  <div className="text-sm font-medium">Order link</div>
+                  <div className="truncate font-mono text-xs text-muted-foreground">
+                    {orderLink}
+                  </div>
                 </div>
-                <CopyButton label="Copy link" value={orderLink} />
+                <CopyButton compact label="Copy link" value={orderLink} />
               </div>
             ) : null}
             {firstTemplate && firstProduct ? (
-              <div className="shortcut-row">
-                <div>
-                  <strong>{firstTemplate.title}</strong>
-                  <span>
+              <div className="flex items-start justify-between gap-3 rounded-md border border-border bg-muted/40 p-3">
+                <div className="min-w-0">
+                  <div className="text-sm font-medium">{firstTemplate.title}</div>
+                  <p className="line-clamp-2 text-xs text-muted-foreground">
                     {firstTemplate.body
                       .replaceAll("{price}", String(firstProduct.price))
                       .replaceAll("{order_link}", orderLink)
@@ -151,9 +176,10 @@ export default async function MerchantDashboardPage() {
                         "{delivery_charge}",
                         String(firstProduct.deliveryCharge)
                       )}
-                  </span>
+                  </p>
                 </div>
                 <CopyButton
+                  compact
                   label="Copy reply"
                   value={firstTemplate.body
                     .replaceAll("{price}", String(firstProduct.price))
@@ -165,8 +191,13 @@ export default async function MerchantDashboardPage() {
                 />
               </div>
             ) : null}
-          </div>
-        </section>
+            {!firstProduct ? (
+              <p className="text-sm text-muted-foreground">
+                Add a product to generate shareable order links.
+              </p>
+            ) : null}
+          </CardContent>
+        </Card>
       </div>
     </AppShell>
   );

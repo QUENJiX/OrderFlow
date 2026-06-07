@@ -32,4 +32,20 @@ describe("buildCourierCsv", () => {
     expect(csv).toContain('"House 7, Road 2 Banani"');
     expect(csv).toContain('"Gift wrap, write ""Eid"""');
   });
+
+  it("neutralizes spreadsheet formulas in attacker-controlled cells", () => {
+    const order = {
+      ...demoOrders[0],
+      customer: {
+        ...demoOrders[0].customer,
+        name: "=HYPERLINK(\"https://evil.example\")"
+      },
+      customerNotes: "@SUM(1,1)"
+    };
+
+    const csv = buildCourierCsv([order], demoProducts);
+
+    expect(csv).toContain("'=HYPERLINK");
+    expect(csv).toContain("\"'@SUM(1,1)\"");
+  });
 });

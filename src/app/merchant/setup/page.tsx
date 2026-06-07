@@ -17,22 +17,26 @@ export default async function MerchantSetupPage() {
   }
 
   return (
-    <main className="auth-page">
-      <section className="auth-copy">
-        <Link className="brand auth-brand" href="/">
-          <span className="brand-mark">OF</span>
-          <span>
-            <strong>OrderFlow BD</strong>
-            <small>Shop setup</small>
-          </span>
-        </Link>
-        <h1>Create the workspace your customers will order from.</h1>
-        <p>
-          Your shop name becomes the public order-link slug. You can add
-          products after this step.
-        </p>
-      </section>
-      <MerchantSetupForm />
+    <main className="relative grid min-h-screen place-items-center bg-background px-4 py-10">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-gradient-to-b from-primary/10 to-transparent" />
+      <div className="relative w-full max-w-md">
+        <div className="mb-6 flex flex-col items-center gap-3 text-center">
+          <Link className="flex items-center gap-2.5" href="/">
+            <span className="flex size-9 items-center justify-center rounded-md bg-gradient-to-br from-primary to-[var(--accent-dark)] text-sm font-bold text-primary-foreground shadow-sm">
+              OF
+            </span>
+            <span className="text-base font-semibold">OrderFlow BD</span>
+          </Link>
+          <h1 className="text-xl font-semibold tracking-tight">
+            Create the workspace your customers will order from.
+          </h1>
+          <p className="max-w-sm text-sm text-muted-foreground">
+            Your shop name becomes the public order-link slug. You can add
+            products after this step.
+          </p>
+        </div>
+        <MerchantSetupForm />
+      </div>
     </main>
   );
 }

@@ -3,6 +3,8 @@ node_modules
 out
 dist
 coverage
+docs/
+.claude/
 .env
 .env.local
 .env.*.local
